@@ -18,7 +18,7 @@ This is my final project for Dr. Vandenbrink's bioinformatics course. It was ori
 The first topic of bioinformatic analysis was working with Microarray data. The next was RNAseq analysis from NGS data. 
 After that it went over various tools as shown below and then went into Phylogenetic analysis. The final section was on GWAS studies. 
 
-https://github.com/mjfos2r
+https://github.com/mjfos2r/final_proj
 
 Much of the working comments have been removed (for the readers sake) and it was finally knitted after hundreds of failed attempts on the dual core VM provided by the course after my apple laptop AND windows PC both failed to knit. 
 I did not feel like getting r-studio set up on ubuntu though I expect it's probably the easiest environment to use it in.
