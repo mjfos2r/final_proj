@@ -830,6 +830,7 @@ str_view(x, "TA[G|T]")
 ## Click here to clear this section
 
 # Bioinformatics {.tabset}
+```{r bioinfologo, echo=TRUE}
 #                                                   _*_     +    /\  +   .
 #                              +     -*-.    +       .        * /**\ 
 #  .    _     *       \|/   .       .      -*-   .             /****\ * /\   +
@@ -839,6 +840,7 @@ str_view(x, "TA[G|T]")
 #    |     |           `  .    ~   `-~ `-`   `-~ `-`   `-~ `- /    \/ /\     \  
 #  _.'-----'-._     *           .         '       .   *   /  /      \/  \/\   \    
 #/             \__.__.--.________________________________/__/_______/___/__\___\
+```
 ***
 ## Microarrays
 ```{r microarrlogo, echo=TRUE}
