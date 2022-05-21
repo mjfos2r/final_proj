@@ -1,29 +1,35 @@
 ---
 title: 'BISC-450C-V84 Final Project: Bioinformatics in R.'
 author: "Michael J. Foster"
-date: '2022-05-16'
+date: '2022-05-18'
 output: 
   html_document: 
     toc: true
     toc_float: true
-    theme: united
+    theme: readable
     highlights: tango
     code_folding: show
 ---
 
-```{r setup, include=FALSE}
-r <- getOption("repos")
-r["CRAN"] <- "http://cran.cnr.berkeley.edu/"
-options(repos = r)
-```
 
 # Final Project
 
-This is a tabbed document, each section will be tabbed to show the raw code in a single view and will also have a streamlined view that shows first by default. 
+This is my final project for Dr. Vandenbrink's bioinformatics course. It was originally much more complex until it refused to knit. This course went over basic data science concepts from a biology perspective. It began with data wrangling and then introduced tidyverse in-depth. 
+The first topic of bioinformatic analysis was working with Microarray data. The next was RNAseq analysis from NGS data. 
+After that it went over various tools as shown below and then went into Phylogenetic analysis. The final section was on GWAS studies. 
 
+https://github.com/mjfos2r
 
-# intro tabs, datawranglin and tidyverse {.tabset}
-This file is organized?
+Much of the working comments have been removed (for the readers sake) and it was finally knitted after hundreds of failed attempts on the dual core VM provided by the course after my apple laptop AND windows PC both failed to knit. 
+I did not feel like getting r-studio set up on ubuntu though I expect it's probably the easiest environment to use it in.
+
+If you desire to reproduce any of this, I highly recommend *nix based environments as long as it's not apple silicon.
+avoid windows.
+I did not feel like fighting with Rosetta2 any more than I already did to get this functional.
+
+# Introduction to working with Bioinformatics data (Data Wrangling, Tidyverse) {.tabset}
+
+garbage in -> garbage out.
 
 
 ## Data Wrangling{.tabset}
@@ -48,6 +54,7 @@ There are two views for this tab. One is to view each command learned in this se
 
 ### introduction
 ```{r datawrangling, echo=TRUE}
+
 #comment added to reflect that this is installed during initialization/depchecks
 library(tidyverse)
 
@@ -183,9 +190,13 @@ view(my_data)
 ```
 ### Mutation Station
 ```{r dwranglemutation, echo = TRUE}
-#############
-# Mutate    #
-#############
+# ▄▀▀▄ ▄▀▄  ▄▀▀▄ ▄▀▀▄  ▄▀▀▀█▀▀▄  ▄▀▀█▄   ▄▀▀▀█▀▀▄  ▄▀▀█▄▄▄▄ 
+#█  █ ▀  █ █   █    █ █    █  ▐ ▐ ▄▀ ▀▄ █    █  ▐ ▐  ▄▀   ▐ 
+#▐  █    █ ▐  █    █  ▐   █       █▄▄▄█ ▐   █       █▄▄▄▄▄  
+#  █    █    █    █      █       ▄▀   █    █        █    ▌  
+#▄▀   ▄▀      ▀▄▄▄▄▀   ▄▀       █   ▄▀   ▄▀        ▄▀▄▄▄▄   
+#█    █               █         ▐   ▐   █          █    ▐   
+#▐    ▐               ▐                 ▐          ▐        
 
 #still using airplane data
 
@@ -269,22 +280,29 @@ sum(!is.na(my_data$dep_delay))
 my_data %>%
   group_by(year, month, day) %>%
   summarize(mean = mean(dep_time, na.rm = TRUE))
-#I like pipes. I like unix. I wish the pipe wasn't such a stupid remap like %>%
+#I like pipes. I like unix. I wish the pipe wasn't so stupid. %>%
 ```
 
 ## Tidyverse{.tabset}
 ```{r tvLogo, echo = TRUE}
 ###########################################################################
-#   ████████╗██╗██████╗ ██╗   ██╗██╗   ██╗███████╗██████╗ ███████╗███████╗
-#  ╚══██╔══╝██║██╔══██╗╚██╗ ██╔╝██║   ██║██╔════╝██╔══██╗██╔════╝██╔════╝
+# ████████╗██╗██████╗ ██╗   ██╗██╗   ██╗███████╗██████╗ ███████╗███████╗
+# ╚══██╔══╝██║██╔══██╗╚██╗ ██╔╝██║   ██║██╔════╝██╔══██╗██╔════╝██╔════╝
 #    ██║   ██║██║  ██║ ╚████╔╝ ██║   ██║█████╗  ██████╔╝███████╗█████╗  
-#   ██║   ██║██║  ██║  ╚██╔╝  ╚██╗ ██╔╝██╔══╝  ██╔══██╗╚════██║██╔══╝  
-#  ██║   ██║██████╔╝   ██║    ╚████╔╝ ███████╗██║  ██║███████║███████╗
-# ╚═╝   ╚═╝╚═════╝    ╚═╝     ╚═══╝  ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝
+#    ██║   ██║██║  ██║  ╚██╔╝  ╚██╗ ██╔╝██╔══╝  ██╔══██╗╚════██║██╔══╝  
+#    ██║   ██║██████╔╝   ██║    ╚████╔╝ ███████╗██║  ██║███████║███████╗
+#    ╚═╝   ╚═╝╚═════╝    ╚═╝     ╚═══╝  ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝
 ##########################################################################
 ```
 ### Tibbles
 ```{r tibbles, echo=TRUE}
+#    ████████╗██╗██████╗ ██████╗ ██╗     ███████╗███████╗
+#    ╚══██╔══╝██║██╔══██╗██╔══██╗██║     ██╔════╝██╔════╝
+#       ██║   ██║██████╔╝██████╔╝██║     █████╗  ███████╗
+#       ██║   ██║██╔══██╗██╔══██╗██║     ██╔══╝  ╚════██║
+#       ██║   ██║██████╔╝██████╔╝███████╗███████╗███████║
+#       ╚═╝   ╚═╝╚═════╝ ╚═════╝ ╚══════╝╚══════╝╚══════╝
+#########
 # make sure the library is initialized/imported.
 library(tibble)
 # now we will explore tibbles. tibbles are modified dataframes which tweak some things that are 
@@ -310,6 +328,13 @@ tibble(
 ```
 ### Tribbles
 ```{r tribble, echo = TRUE}
+# ████████╗██████╗ ██╗██████╗ ██████╗ ██╗     ███████╗███████╗
+# ╚══██╔══╝██╔══██╗██║██╔══██╗██╔══██╗██║     ██╔════╝██╔════╝
+#    ██║   ██████╔╝██║██████╔╝██████╔╝██║     █████╗  ███████╗
+#    ██║   ██╔══██╗██║██╔══██╗██╔══██╗██║     ██╔══╝  ╚════██║
+#    ██║   ██║  ██║██║██████╔╝██████╔╝███████╗███████╗███████║
+#    ╚═╝   ╚═╝  ╚═╝╚═╝╚═════╝ ╚═════╝ ╚══════╝╚══════╝╚══════╝
+########## 
 # in addition to tibble(), there's also tRibble(). it appears to be a basic table constructor based on how I define the rough layout.
 # seems convenient
 tribble(  
@@ -389,12 +414,12 @@ head(df_tibble_2)
 ### Tidy R{.tabset}
 ```{r tidyr, echo = TRUE}
 ###########################################
-#         _______     __      ____        #
-#        /_  __(_)___/ /_  __/ __ \       #
-#         / / / / __  / / / / /_/ /       #
-#        / / / / /_/ / /_/ / _, _/        #
-#       /_/ /_/\__,_/\__, /_/ |_|         #
-#                   /____/                #
+# ████████╗██╗██████╗ ██╗   ██╗██████╗ 
+#  ══██╔══╝██║██╔══██╗╚██╗ ██╔╝██╔══██╗
+#    ██║   ██║██║  ██║ ╚████╔╝ ██████╔╝
+#    ██║   ██║██║  ██║  ╚██╔╝  ██╔══██╗
+#    ██║   ██║██████╔╝   ██║   ██║  ██║
+#    ╚═╝   ╚═╝╚═════╝    ╚═╝   ╚═╝  ╚═╝
 ###########################################
 
 # getting the hang of this ASCII art :P
@@ -491,113 +516,6 @@ spread(table2, key = type, value = count)
 # tl;dr 
 # spread = loooooong turns to short n wide
 # gather = wiiiiiide turns to narrow n long
-```
-
-```{r}
-#####################################################
-# separate and pull
-#####################################################
-
-# now what about two observations in one column? 
-
-table3
-
-# rate = population + cases
-# We can use separate files to fix this.
-
-table3 %>%
-  separate(rate, into = c("cases","population"))
-
-# However, the column type is not correct.
-
-table3 %>%
-  separate(rate, into = c("cases","populate"), conver = TRUE)
-
-# You can specify separation delim.
-
-table3 %>%
-  separate(rate, into = c("cases", "populate"), sep = "/", conver = TRUE)
-
-# Let's make this look like humans wrote it.
-
-table3 %>%
-  separate(
-    year,
-    into = c("cases","population"),
-    convert = TRUE,
-    sep = 2
-  )
-
-#####################################################
-# unite
-#####################################################
-
-# what about doing the inverse of separate?
-
-table5
-
-table5 %>%
-  unite(date, century, year)
-
-table5 %>%
-  unite(date, century, year, sep = "")
-
-#####################################################
-# missing values
-#####################################################
-
-# There can be two types of missing values. NA (explicit) or just no entry (implicit)
-
-gene_data <- tibble(
-  gene = c('a', 'a', 'a', 'a', 'b', 'b', 'b'),
-  nuc = c(20, 22, 24, 25, NA, 42, 67),
-  run = c(1,2,3,4,2,3,4)
-)
-
-gene_data
-
-# The nucleotide count for gene b run 2 is explicitly missing.
-# The nucleotide count for gene b run 1 is implicitly missing.
-
-# One way we can make implicit missing values explicit is by putting runs in columns
-
-gene_data %>%
-  spread(gene, nuc)
-
-# If we want to remove the missing values, we can use spread and gather, and na.rm = TRUE
-
-gene_data %>%
-  spread(gene, nuc) %>%
-  gather(gene, nuc, 'a':'b', na.rm = TRUE)
-# na.rm is what helped me deal with louisiana LDH data....... so many NAs....
-
-# Another way is to force implicit values into explicit, via complete()
-
-gene_data %>%
-  complete(gene, run)
-
-# Sometimes an NA is present to represent a value being carried forward.
-
-treatment <- tribble(
-  ~person,     ~treatment,     ~response,
-  ###########################################
-  "Isaac",            1,              7,
-  NA,                 2,              10,
-  NA,                 3,              9, 
-  "VDB",              1,              8,
-  NA,                 2,              11,
-  NA,                 3,              10,
-)
-
-# as seen above, this isn't the bad type of NA, but rather a way of reserving 
-# rows for the person listed above.
-
-treatment
-
-# lets use fill() to drag down the above person to their respective NA values
-
-treatment %>%
-  fill(person)
 ```
 ##### Separate and Pull
 ```{r sepnpul, echo=TRUE}
@@ -714,11 +632,11 @@ treatment %>%
 ### DPLYR
 ```{r dplyrsec, echo=TRUE}
 #####################################################
-#          ██████╗ ██████╗ ██╗  ██╗   ██╗██████╗     
-#         ██╔══██╗██╔══██╗██║  ╚██╗ ██╔╝██╔══██╗    
-#        ██║  ██║██████╔╝██║   ╚████╔╝ ██████╔╝    
-#       ██║  ██║██╔═══╝ ██║    ╚██╔╝  ██╔══██╗    
-#      ██████╔╝██║     ███████╗██║   ██║  ██║    
+#     ██████╗ ██████╗ ██╗  ██╗   ██╗██████╗     
+#     ██╔══██╗██╔══██╗██║  ╚██╗ ██╔╝██╔══██╗    
+#     ██║  ██║██████╔╝██║   ╚████╔╝ ██████╔╝    
+#     ██║  ██║██╔═══╝ ██║    ╚██╔╝  ██╔══██╗    
+#     ██████╔╝██║     ███████╗██║   ██║  ██║    
 #     ╚═════╝ ╚═╝     ╚══════╝╚═╝   ╚═╝  ╚═╝#
 #####################################################
 
@@ -909,11 +827,19 @@ str_view(x, "TA[^T]")
 str_view(x, "TA[G|T]")
 ```
 
-
-
 ## Click here to clear this section
-# Bioinformatics {.tabset}
 
+# Bioinformatics {.tabset}
+#                                                   _*_     +    /\  +   .
+#                              +     -*-.    +       .        * /**\ 
+#  .    _     *       \|/   .       .      -*-   .             /****\ * /\   +
+#    .' \\`.     +    -*-     *-. .-.   .-. .-.   .-. .-.   . /      \ /**\   
+# .  |__''_|  .       /|\ +      \   \ /   \   \ /   \   \ / /  /\    /    \    
+#    |     | .                  / \   \   / \   \   / \   \ /  /  \  /      \                      
+#    |     |           `  .    ~   `-~ `-`   `-~ `-`   `-~ `- /    \/ /\     \  
+#  _.'-----'-._     *           .         '       .   *   /  /      \/  \/\   \    
+#/             \__.__.--.________________________________/__/_______/___/__\___\
+***
 ## Microarrays
 ```{r microarrlogo, echo=TRUE}
 #███╗   ███╗██╗ ██████╗██████╗  ██████╗  █████╗ ██████╗ ██████╗  █████╗ ██╗   ██╗
@@ -924,11 +850,12 @@ str_view(x, "TA[G|T]")
 #╚═╝     ╚═╝╚═╝ ╚═════╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝  
 ```
 ```{r Microarrays, echo = TRUE}
+#This was originally in sections but it refused to knit unless contiguous 
 BiocManager::install("affy")
 # Limma Microarray Analysis
 
-setwd("C:/Users/Michael/Desktop/final_proj_bisc450cv84")
-#setwd("C:/Users/Michael/Desktop/final_proj_bisc450cv84")
+setwd("~/Desktop/classroom/myfiles")
+#setwd("~/Desktop/classroom/myfiles")
 
 
 library(ath1121501cdf)
@@ -1017,11 +944,14 @@ head(all2, 10)
 
 
 ###############################################################################
-# PathView
+# ██████╗  █████╗ ████████╗██╗  ██╗██╗   ██╗██╗███████╗██╗    ██╗
+# ██╔══██╗██╔══██╗╚══██╔══╝██║  ██║██║   ██║██║██╔════╝██║    ██║
+# ██████╔╝███████║   ██║   ███████║██║   ██║██║█████╗  ██║ █╗ ██║
+# ██╔═══╝ ██╔══██║   ██║   ██╔══██║╚██╗ ██╔╝██║██╔══╝  ██║███╗██║
+# ██║     ██║  ██║   ██║   ██║  ██║ ╚████╔╝ ██║███████╗╚███╔███╔╝
+# ╚═╝     ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝  ╚═══╝  ╚═╝╚══════╝ ╚══╝╚══╝ 
 ###############################################################################
-BiocManager::install("pathview")
-BiocManager::install("gage")
-BiocManager::install("gageData")
+
 library(pathview)
 library(gage)
 library(gageData)
@@ -1090,15 +1020,42 @@ plot_pathway = function(pid) pathview(gene.data=foldchanges, pathway.id = pid, s
 tmp = sapply(keggresids_less, function(pid) pathview(gene.data = foldchanges, pathway.id = pid, species = "ath"))
 ```
 
+***
 ## RNASeq{.tabset}
+```{r rnaseqlogo, echo=TRUE}
+##-.       .-.       .-.       .-.       .-.       .-.           
+#||\     /|||\     /|||\     /|||\     /|||\     /|||\     
+#   \|||\|    \|||\|    \|||\|    \|||\|    \|||\|    \|||\|
+#~   `-~ `     `-~ `     `-~ `~    `-~ `     `-~ `     `-~ `
+#     ██████╗ ███╗   ██╗ █████╗ ███████╗███████╗ ██████╗ 
+#     ██╔══██╗████╗  ██║██╔══██╗██╔════╝██╔════╝██╔═══██╗
+#     ██████╔╝██╔██╗ ██║███████║███████╗█████╗  ██║   ██║
+#     ██╔══██╗██║╚██╗██║██╔══██║╚════██║██╔══╝  ██║▄▄ ██║
+#     ██║  ██║██║ ╚████║██║  ██║███████║███████╗╚██████╔╝
+#     ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝╚══════╝ ╚══▀▀═╝ 
+#-.       .-.       .-.       .-.       .-.       .-.           
+#||\     /|||\     /|||\     /|||\     /|||\     /|||\     
+#   \|||\|    \|||\|    \|||\|    \|||\|    \|||\|    \|||\|
+#~   `-~ `     `-~ `     `-~ `~    `-~ `     `-~ `     `-~ ` 
+```
+
 
 ### EdgeR
-```{r RNASeqedger, echo = TRUE}
-BiocManager::install("edgeR")
+```{r edger1, echo=TRUE}
+#███████╗██████╗  ██████╗ ███████╗    ██████╗ 
+#██╔════╝██╔══██╗██╔════╝ ██╔════╝    ██╔══██╗
+#█████╗  ██║  ██║██║  ███╗█████╗      ██████╔╝
+#██╔══╝  ██║  ██║██║   ██║██╔══╝      ██╔══██╗
+#███████╗██████╔╝╚██████╔╝███████╗    ██║  ██║
+#╚══════╝╚═════╝  ╚═════╝ ╚══════╝    ╚═╝  ╚═╝
+#########
+
 library("edgeR")
 library("dplyr")
 library("AnnotationDbi")
 library("org.Mm.eg.db")
+```
+```{r edger2, echo=TRUE}
 
 rawdata= read.csv("GLDS-102_rna_seq_Normalized_Counts.csv", row.names = "gene_id")
 
@@ -1135,7 +1092,8 @@ lrt <- glmLRT(fit, coef =2)
 ttGlm <- topTags(lrt, n = Inf)
 
 class(ttGlm)
-
+```
+```{r edger3, echo=TRUE}
 summary(deGlm <- decideTestsDGE(lrt, p = 0.1, adjust = "fdr"))
 
 tagsGlm <- rownames (dgeGlmTagDisp)[as.logical(deGlm)]
@@ -1145,6 +1103,9 @@ plotSmear(lrt, de.tags = tagsGlm)
 hits2 <- ttGlm$table[ttGlm$table$FDR < 0.1, ]
 
 write.csv(hits2, "Mouse_EdgeR_Results_Zero_vs_1.csv")
+
+```
+```{r edger4, echo=TRUE}
 
 columns(org.Mm.eg.db)
 
@@ -1167,7 +1128,8 @@ ttGlm2$name = mapIds(org.Mm.eg.db,
                        multivals = "first")
 
 head(ttGlm2)
-
+```
+```{r edger5, echo=TRUE}
 library(pathview)
 library(gage)
 library(gageData)
@@ -1187,6 +1149,9 @@ lapply(keggres, head)
 greaters <- keggres$greater
 lessers <- keggres$less
 
+```
+```{r edger6, echo=TRUE}
+
 keggrespathways = data.frame(id = rownames(keggres$greater), keggres$greater) %>%
   tibble::as_tibble() %>%
   filter(row_number()<=5) %>%
@@ -1196,11 +1161,16 @@ keggrespathways
 
 keggresids = substr(keggrespathways, start=1, stop=8)
 keggresids
-
+```
+```{r edger7, echo=TRUE}
 plot_pathway = function(pid) pathview(gene.data=foldchanges, pathway.id = pid, species = "mouse", new.signature = FALSE)
 
 # Plot Multiple Pathways
 tmp = sapply(keggresids, function(pid) pathview(gene.data=foldchanges, pathway.id = pid, species = "mouse"))
+
+```
+```{r edger8, echo=TRUE}
+
 
 keggrespathways = data.frame(id = rownames(keggres$less), keggres$less) %>%
   tibble::as_tibble() %>%
@@ -1211,27 +1181,42 @@ keggrespathways
 
 keggresids = substr(keggrespathways, start=1, stop=8)
 keggresids
-
+```
+```{r edger9, echo=TRUE}
 plot_pathway = function(pid) pathview(gene.data=foldchanges, pathway.id = pid, species = "mouse", new.signature = FALSE)
 
 # Plot Multiple Pathways
 tmp = sapply(keggresids, function(pid) pathview(gene.data=foldchanges, pathway.id = pid, species = "mouse"))
 
+```
+```{r edger10, echo=TRUE}
+
 library(imager)
 
-filenames <- list.files(path = "/home/studentdesktop/classroom/myfiles", pattern = ".*pathview.png")
-
+filenames <- list.files(path = "~/Desktop/classroom/myfiles", pattern = "*.pathview.png")
+filenames
 all_images <- lapply(filenames, load.image)
+
+```
+```{r edger11, echo=TRUE}
 
 knitr::include_graphics(filenames)
 
 ```
 ### DESeq
 ```{r deseq, echo = TRUE}
-setwd("C:/Users/Michael/Desktop/final_proj_bisc450cv84")
+#██████╗ ███████╗███████╗███████╗ ██████╗ 
+#██╔══██╗██╔════╝██╔════╝██╔════╝██╔═══██╗
+#██║  ██║█████╗  ███████╗█████╗  ██║   ██║
+#██║  ██║██╔══╝  ╚════██║██╔══╝  ██║▄▄ ██║
+#██████╔╝███████╗███████║███████╗╚██████╔╝
+#╚═════╝ ╚══════╝╚══════╝╚══════╝ ╚══▀▀═╝
+#########
+setwd("~/Desktop/classroom/myfiles")
 
 BiocManager::install("apeglm", update = FALSE)
-
+#BiocManager::install("DESeq2")
+#install.packages("emdbook")
 library(DESeq2)
 library("dplyr")
 library("apeglm")
@@ -1376,8 +1361,15 @@ knitr::include_graphics(filenames)
 ```
 ### EdgeR vs. DESeq
 ```{r edgevsdeseq, echo = TRUE}
+#███████╗██████╗  ██████╗ ███████╗ ██╗   ██╗███████╗  ██████╗ ███████╗███████╗███████╗ ██████╗ 
+#██╔════╝██╔══██╗██╔════╝ ██╔════╝ ██║   ██║██╔════╝  ██╔══██╗██╔════╝██╔════╝██╔════╝██╔═══██╗
+#█████╗  ██║  ██║██║  ███╗█████╗   ██║   ██║███████╗  ██║  ██║█████╗  ███████╗█████╗  ██║   ██║
+#██╔══╝  ██║  ██║██║   ██║██╔══╝   ╚██╗ ██╔╝╚════██║  ██║  ██║██╔══╝  ╚════██║██╔══╝  ██║▄▄ ██║
+#███████╗██████╔╝╚██████╔╝███████╗  ╚████╔╝ ███████║  ██████╔╝███████╗███████║███████╗╚██████╔╝
+#╚══════╝╚═════╝  ╚═════╝ ╚══════╝   ╚═══╝  ╚══════╝  ╚═════╝ ╚══════╝╚══════╝╚══════╝ ╚══▀▀═╝ 
+#########
 
-setwd("C:/Users/Michael/Desktop/final_proj_bisc450cv84")
+setwd("~/Desktop/classroom/myfiles")
 
 library(tidyverse)
 
@@ -1403,9 +1395,23 @@ comp$plot
 
 comp$table
 ```
+***
 ## Other Tools{.tabset}
+Other Tools.
+***
 ### Protein Alignment
 ```{r protalign, echo = TRUE}
+#███╗   ███╗███████╗ █████╗ 
+#████╗ ████║██╔════╝██╔══██╗
+#██╔████╔██║███████╗███████║
+#██║╚██╔╝██║╚════██║██╔══██║
+#██║ ╚═╝ ██║███████║██║  ██║
+#╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝
+#-. .-.   .-. .-.   .-. .-.   .-. .-.   .-. .-.   .-. .-.   .-. .-.   .-. .-.      
+#||\|||\ /|||\|||\ /|||\|||\ /|||\|||\ /|||\|||\ /|||\|||\ /|||\|||\ /|||\|||\ 
+#|/ \|||\|||/ \|||\|||/ \|||\|||/ \|||\|||/ \|||\|||/ \|||\|||/ \|||\|||/ \|||\
+#~   `-~ `-`   `-~ `-`   `-~ `-~   `-~ `-`   `-~ `-`   `-~ `-~   `-~ `-`   `-~ 
+#############################
 library(msa)
 
 seq <- readAAStringSet("hglobin.fa")
@@ -1439,14 +1445,22 @@ tree <- ape::nj(distances1)
 plot(tree, main = "Phylogenetic Tree of HBA Sequences")
 
 ```
+***
 ### Synteny
 ```{r synteny, echo = TRUE}
+#███████╗██╗   ██╗███╗   ██╗████████╗███████╗███╗   ██╗██╗   ██╗
+#██╔════╝╚██╗ ██╔╝████╗  ██║╚══██╔══╝██╔════╝████╗  ██║╚██╗ ██╔╝
+#███████╗ ╚████╔╝ ██╔██╗ ██║   ██║   █████╗  ██╔██╗ ██║ ╚████╔╝ 
+#╚════██║  ╚██╔╝  ██║╚██╗██║   ██║   ██╔══╝  ██║╚██╗██║  ╚██╔╝  
+#███████║   ██║   ██║ ╚████║   ██║   ███████╗██║ ╚████║   ██║   
+#╚══════╝   ╚═╝   ╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚═╝  ╚═══╝   ╚═╝
+#########
 library(DECIPHER)
 
 # In the first step, we load the libraries and the sequence into the long_seqs
 # This is a DNAStringSet object
 
-setwd("C:/Users/Michael/Desktop/final_proj_bisc450cv84")
+setwd("~/Desktop/classroom/myfiles")
 long_seq <- readDNAStringSet("plastid_genomes.fa")
 long_seq
 
@@ -1472,11 +1486,23 @@ block <- unlist(alignment[[1]])
 writeXStringSet(block, "genome_blocks_out.fa")
 
 ```
+***
 ### Unannotated Regions
 ```{r unannReg, echo = TRUE}
+#██████╗ ███████╗ █████╗ ███╗   ███╗████████╗ ██████╗  ██████╗ ██╗     ███████╗
+#██╔══██╗██╔════╝██╔══██╗████╗ ████║╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝
+#██████╔╝███████╗███████║██╔████╔██║   ██║   ██║   ██║██║   ██║██║     ███████╗
+#██╔══██╗╚════██║██╔══██║██║╚██╔╝██║   ██║   ██║   ██║██║   ██║██║     ╚════██║
+#██║  ██║███████║██║  ██║██║ ╚═╝ ██║   ██║   ╚██████╔╝╚██████╔╝███████╗███████║
+#╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝   ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝
+#-. .-.   .-. .-.   .-. .-.   .-. .-.   .-. .-.   .-. .-.   .-. .-.   .-. .-.      
+#||\|||\ /|||\|||\ /|||\|||\ /|||\|||\ /|||\|||\ /|||\|||\ /|||\|||\ /|||\|||\ 
+#|/ \|||\|||/ \|||\|||/ \|||\|||/ \|||\|||/ \|||\|||/ \|||\|||/ \|||\|||/ \|||\
+#~   `-~ `-`   `-~ `-`   `-~ `-~   `-~ `-`   `-~ `-`   `-~ `-~   `-~ `-`   `-~ 
+###########
 library(locfit)
 library(Rsamtools)
-setwd("C:/Users/Michael/Desktop/final_proj_bisc450cv84")
+setwd("~/Desktop/classroom/myfiles")
 
 # Let's create a function that will load the gene region information in a GFF
 # file and convert it to a bioconductor GRanges object
@@ -1544,16 +1570,32 @@ table(clusters)
 # In this step, we will map the reads to the regions we found for the genome
 bumphunter::regionFinder(pile_df$count, pile_df$seqnames, pile_df$pos, clusters, cutoff = 1)
 ```
-
+***
 ## Phylogenetic Analysis{.tabset}
+Phylogenetic Analysis.
+***
 ### Treeio
 ```{r treeio, echo = TRUE}
+#████████╗██████╗ ███████╗███████╗██╗ ██████╗        
+#╚══██╔══╝██╔══██╗██╔════╝██╔════╝██║██╔═══██╗       
+#   ██║   ██████╔╝█████╗  █████╗  ██║██║   ██║       
+#   ██║   ██╔══██╗██╔══╝  ██╔══╝  ██║██║   ██║       
+#   ██║   ██║  ██║███████╗███████╗██║╚██████╔╝       
+#   ╚═╝   ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝ ╚═════╝        
+#                                                    
+# ██████╗  ██████╗ ██████╗ ██╗      ██████╗ ████████╗
+#██╔════╝ ██╔════╝ ██╔══██╗██║     ██╔═══██╗╚══██╔══╝
+#██║  ███╗██║  ███╗██████╔╝██║     ██║   ██║   ██║   
+#██║   ██║██║   ██║██╔═══╝ ██║     ██║   ██║   ██║   
+#╚██████╔╝╚██████╔╝██║     ███████╗╚██████╔╝   ██║   
+# ╚═════╝  ╚═════╝ ╚═╝     ╚══════╝ ╚═════╝    ╚═╝   
+#########
 
 # Let's load the required packages:
 library(ggplot2)
 library(ggtree)
 library(treeio)
-setwd("C:/Users/Michael/Desktop/final_proj_bisc450cv84")
+setwd("~/Desktop/classroom/myfiles")
 # First we need to load our raw tree data.  It's a Newick format so we use:
 itol <- ape::read.tree("itol.nwk")
 
@@ -1589,9 +1631,16 @@ ggtree(itol, layout = "unrooted") + geom_hilight(node = 206, type = "encircle", 
 ```
 ### Treespace
 ```{r treespace, echo = TRUE}
+#████████╗██████╗ ███████╗███████╗███████╗██████╗  █████╗  ██████╗███████╗
+#╚══██╔══╝██╔══██╗██╔════╝██╔════╝██╔════╝██╔══██╗██╔══██╗██╔════╝██╔════╝
+#   ██║   ██████╔╝█████╗  █████╗  ███████╗██████╔╝███████║██║     █████╗  
+#   ██║   ██╔══██╗██╔══╝  ██╔══╝  ╚════██║██╔═══╝ ██╔══██║██║     ██╔══╝  
+#   ██║   ██║  ██║███████╗███████╗███████║██║     ██║  ██║╚██████╗███████╗
+#   ╚═╝   ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝╚═╝     ╚═╝  ╚═╝ ╚═════╝╚══════╝
+########
 
 # Quantifying difference between trees with treespace
-setwd("C:/Users/Michael/Desktop/final_proj_bisc450cv84")
+setwd("~/Desktop/classroom/myfiles")
 # First, let's load the required packages
 library(ape)
 library(adegraphics)
@@ -1630,17 +1679,24 @@ plotGroves(groves)
 ```
 ### Subtrees
 ```{r subtree, echo = TRUE}
+#███████╗██╗   ██╗██████╗ ████████╗██████╗ ███████╗███████╗
+#██╔════╝██║   ██║██╔══██╗╚══██╔══╝██╔══██╗██╔════╝██╔════╝
+#███████╗██║   ██║██████╔╝   ██║   ██████╔╝█████╗  █████╗  
+#╚════██║██║   ██║██╔══██╗   ██║   ██╔══██╗██╔══╝  ██╔══╝  
+#███████║╚██████╔╝██████╔╝   ██║   ██║  ██║███████╗███████╗
+#╚══════╝ ╚═════╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝╚══════╝╚══════╝
+#########
 # Extracting and working with subtrees using APE
 
-setwd("C:/Users/Michael/Desktop/final_proj_bisc450cv84")
+setwd("~/Desktop/classroom/myfiles")
 
 # Load our required packages
 library(ape)
-
+??ape
 # Now let's load the tree data we will be working with
 newick <- read.tree("mammal_tree.nwk.txt")
 
-1 <- subtrees(newick)
+l <- subtrees(newick)
 
 # Let's plot the tree to see what it looks like
 plot(newick)
@@ -1658,10 +1714,17 @@ plot(new_tree)
 ```
 ### Trees from Alignment
 ```{r treesfrmalign, echo = TRUE}
+# █████╗ ██╗     ██╗ ██████╗ ███╗   ██╗██████╗ ████████╗██████╗ ███████╗███████╗
+#██╔══██╗██║     ██║██╔════╝ ████╗  ██║╚════██╗╚══██╔══╝██╔══██╗██╔════╝██╔════╝
+#███████║██║     ██║██║  ███╗██╔██╗ ██║ █████╔╝   ██║   ██████╔╝█████╗  █████╗  
+#██╔══██║██║     ██║██║   ██║██║╚██╗██║██╔═══╝    ██║   ██╔══██╗██╔══╝  ██╔══╝  
+#██║  ██║███████╗██║╚██████╔╝██║ ╚████║███████╗   ██║   ██║  ██║███████╗███████╗
+#╚═╝  ╚═╝╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚══════╝
+#########
 
 # Reconstructing trees from alignments
 
-setwd("C:/Users/Michael/Desktop/final_proj_bisc450cv84")
+setwd("~/Desktop/classroom/myfiles")
 
 # Let's load the packages
 library(Biostrings)
@@ -1707,11 +1770,19 @@ plotBS(nj_tree, bootstraps, p = 10)
 
 ```
 
+***
 ## Genome Wide Association Study{.tabset}
 ### Variant Tools
 ```{r vtools, echo = TRUE}
+#██╗   ██╗████████╗ ██████╗  ██████╗ ██╗     ███████╗
+#██║   ██║╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝
+#██║   ██║   ██║   ██║   ██║██║   ██║██║     ███████╗
+#╚██╗ ██╔╝   ██║   ██║   ██║██║   ██║██║     ╚════██║
+# ╚████╔╝    ██║   ╚██████╔╝╚██████╔╝███████╗███████║
+#  ╚═══╝     ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝
+########
 # First let's load the required libraries
-setwd("C:/Users/Michael/Desktop/final_proj_bisc450cv84")
+setwd("~/Desktop/classroom/myfiles")
 library(GenomicRanges)
 library(gmapR)
 library(rtracklayer)
@@ -1773,6 +1844,13 @@ identified <- genes[subjectHits(overlaps)]
 ```
 ### Open Reading Frames
 ```{r orfs, echo = TRUE}
+# ██████╗ ██████╗ ███████╗███████╗
+#██╔═══██╗██╔══██╗██╔════╝██╔════╝
+#██║   ██║██████╔╝█████╗  ███████╗
+#██║   ██║██╔══██╗██╔══╝  ╚════██║
+#╚██████╔╝██║  ██║██║     ███████║
+# ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚══════╝
+#########
 # First thing, let's load the required packages
 library(Biostrings)
 library(systemPipeR)
@@ -1843,6 +1921,13 @@ writeXStringSet(extracted_orfs, "saved_orfs.fa")
 ```
 ### KaryoploteR
 ```{r karyoploteR, echo = TRUE}
+#██╗  ██╗ █████╗ ██████╗ ██╗   ██╗ ██████╗ ██████╗ ██╗      ██████╗ ████████╗███████╗██████╗ 
+#██║ ██╔╝██╔══██╗██╔══██╗╚██╗ ██╔╝██╔═══██╗██╔══██╗██║     ██╔═══██╗╚══██╔══╝██╔════╝██╔══██╗
+#█████╔╝ ███████║██████╔╝ ╚████╔╝ ██║   ██║██████╔╝██║     ██║   ██║   ██║   █████╗  ██████╔╝
+#██╔═██╗ ██╔══██║██╔══██╗  ╚██╔╝  ██║   ██║██╔═══╝ ██║     ██║   ██║   ██║   ██╔══╝  ██╔══██╗
+#██║  ██╗██║  ██║██║  ██║   ██║   ╚██████╔╝██║     ███████╗╚██████╔╝   ██║   ███████╗██║  ██║
+#╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝    ╚═════╝ ╚═╝     ╚══════╝ ╚═════╝    ╚═╝   ╚══════╝╚═╝  ╚═╝
+#########
 # First let's load the required packages
 library(karyoploteR)
 library(GenomicRanges)
