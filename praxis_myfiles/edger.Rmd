@@ -1,0 +1,180 @@
+---
+title: "edger"
+author: "mjf"
+date: "5/19/2022"
+output: html_document
+---
+
+```{r edger1, echo=TRUE}
+library("edgeR")
+library("dplyr")
+library("AnnotationDbi")
+library("org.Mm.eg.db")
+
+```
+
+
+```{r edger2, echo=TRUE}
+
+rawdata= read.csv("GLDS-102_rna_seq_Normalized_Counts.csv", row.names = "gene_id")
+
+group <- factor(c('1', '1', '1', '1', '1', '1', '2', '2', '2', '2', '2', '2'))
+
+dgeGlm <- DGEList(counts = rawdata, group = group)
+str(dgeGlm)
+
+keep <- rowSums(cpm(dgeGlm)>2) >=4
+
+dgeGlm <- dgeGlm[keep,]
+
+names(dgeGlm)
+
+dgeGlm[["samples"]]
+
+design <- model.matrix(~group)
+design
+
+dgeGlmComDisp <- estimateGLMCommonDisp(dgeGlm, design, verbose = TRUE)
+
+dgeGlmTrendDisp <- estimateGLMTrendedDisp(dgeGlmComDisp, design)
+
+dgeGlmTagDisp <- estimateGLMTagwiseDisp(dgeGlmTrendDisp, design)
+
+plotBCV(dgeGlmTagDisp)
+
+fit <- glmFit(dgeGlmTagDisp, design)
+
+colnames(coef(fit))
+
+lrt <- glmLRT(fit, coef =2)
+
+ttGlm <- topTags(lrt, n = Inf)
+
+class(ttGlm)
+```
+
+
+```{r edger3, echo=TRUE}
+summary(deGlm <- decideTestsDGE(lrt, p = 0.1, adjust = "fdr"))
+
+tagsGlm <- rownames (dgeGlmTagDisp)[as.logical(deGlm)]
+
+plotSmear(lrt, de.tags = tagsGlm)
+
+hits2 <- ttGlm$table[ttGlm$table$FDR < 0.1, ]
+
+write.csv(hits2, "Mouse_EdgeR_Results_Zero_vs_1.csv")
+
+```
+
+
+```{r edger4, echo=TRUE}
+
+columns(org.Mm.eg.db)
+
+ttGlm2 <- as.data.frame(ttGlm$table)
+
+ttGlm2$symbol = mapIds(org.Mm.eg.db,
+                       keys=row.names(ttGlm2),
+                       column = "SYMBOL",
+                       keytype = "ENSEMBL",
+                       multivals = "first")
+ttGlm2$entrez = mapIds(org.Mm.eg.db,
+                       keys=row.names(ttGlm2),
+                       column = "SYMBOL",
+                       keytype = "ENSEMBL",
+                       multivals = "first")
+ttGlm2$name = mapIds(org.Mm.eg.db,
+                       keys=row.names(ttGlm2),
+                       column = "GENENAME",
+                       keytype = "ENSEMBL",
+                       multivals = "first")
+
+head(ttGlm2)
+```
+
+
+```{r edger5, echo=TRUE}
+library(pathview)
+library(gage)
+library(gageData)
+data(kegg.sets.mm)
+data(go.subs.mm)
+
+foldchanges <- ttGlm2$logFC
+names(foldchanges) <- ttGlm2$entrez
+kegg.mm = kegg.gsets("mouse", id.type = "entrez")
+kegg.mm.sigmet = kegg.mm$kg.sets[kegg.mm$sigmet.idx]
+
+# Let's get the results
+keggres = gage(foldchanges, gsets=kegg.mm.sigmet, same.dir = TRUE)
+
+lapply(keggres, head)
+
+greaters <- keggres$greater
+lessers <- keggres$less
+
+```
+
+
+```{r}
+
+keggrespathways = data.frame(id = rownames(keggres$greater), keggres$greater) %>%
+  tibble::as_tibble() %>%
+  filter(row_number()<=5) %>%
+  .$id %>%
+  as.character()
+keggrespathways
+
+keggresids = substr(keggrespathways, start=1, stop=8)
+keggresids
+```
+```{r}
+plot_pathway = function(pid) pathview(gene.data=foldchanges, pathway.id = pid, species = "mouse", new.signature = FALSE)
+
+# Plot Multiple Pathways
+tmp = sapply(keggresids, function(pid) pathview(gene.data=foldchanges, pathway.id = pid, species = "mouse"))
+
+```
+
+
+
+```{r edger6, echo=TRUE}
+
+
+keggrespathways = data.frame(id = rownames(keggres$less), keggres$less) %>%
+  tibble::as_tibble() %>%
+  filter(row_number()<=5) %>%
+  .$id %>%
+  as.character()
+keggrespathways
+
+keggresids = substr(keggrespathways, start=1, stop=8)
+keggresids
+```
+
+```{r edger7, echo=TRUE}
+plot_pathway = function(pid) pathview(gene.data=foldchanges, pathway.id = pid, species = "mouse", new.signature = FALSE)
+
+# Plot Multiple Pathways
+tmp = sapply(keggresids, function(pid) pathview(gene.data=foldchanges, pathway.id = pid, species = "mouse"))
+
+```
+
+
+```{r edger8, echo=TRUE}
+
+library(imager)
+
+filenames <- list.files(path = "~/Desktop/classroom/myfiles", pattern = "*.pathview.png")
+filenames
+all_images <- lapply(filenames, load.image)
+
+```
+
+
+```{r edger9, echo=TRUE}
+
+knitr::include_graphics(filenames)
+
+```

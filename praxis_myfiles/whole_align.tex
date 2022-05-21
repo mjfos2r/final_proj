@@ -1,0 +1,44 @@
+\documentclass[10pt]{article}
+
+\usepackage{texshade}
+
+\headheight=0pt
+\headsep=0pt
+\hoffset=0pt
+\voffset=0pt
+\paperwidth=11in
+\paperheight=8.5in
+\ifx\pdfoutput\undefined
+\relax
+\else
+\pdfpagewidth=\paperwidth
+\pdfpageheight=\paperheight
+\fi
+\oddsidemargin=-0.9in
+\topmargin=-0.7in
+\textwidth=10.8in
+\textheight=7.9in
+
+\pagestyle{empty}
+
+\begin{document}
+\begin{texshade}{/tmp/RtmpUL907t/seq35cb5e53f49c.fasta}
+\seqtype{P}
+\shadingmode{identical}
+\threshold{50}
+\showconsensus[ColdHot]{bottom}
+\shadingcolors{blues}
+\hidelogoscale
+\shownames{left}
+\nameseq{1}{HBA HUMAN}
+\nameseq{2}{HBA Gorilla}
+\nameseq{3}{HBA Porpoise}
+\nameseq{4}{HBA Capucin}
+\nameseq{5}{HBA MOUSE}
+\nameseq{6}{HBA Pit Viper}
+\nameseq{7}{HBA Loggerhead}
+\nameseq{8}{HBA Owl Parrot}
+\shownumbering{right}
+\showlegend
+\end{texshade}
+\end{document}

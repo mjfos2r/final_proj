@@ -1,0 +1,1979 @@
+---
+title: 'BISC-450C-V84 Final Project: Bioinformatics in R.'
+author: "Michael J. Foster"
+date: '2022-05-18'
+output: 
+  html_document: 
+    toc: true
+    toc_float: true
+    theme: readable
+    highlights: tango
+    code_folding: show
+---
+
+
+# Final Project
+
+This is my final project for Dr. Vandenbrink's bioinformatics course. It was originally much more complex until it refused to knit. This course went over basic data science concepts from a biology perspective. It began with data wrangling and then introduced tidyverse in-depth. 
+The first topic of bioinformatic analysis was working with Microarray data. The next was RNAseq analysis from NGS data. 
+After that it went over various tools as shown below and then went into Phylogenetic analysis. The final section was on GWAS studies. 
+
+https://github.com/mjfos2r/final_proj
+
+Much of the working comments have been removed (for the readers sake) and it was finally knitted after hundreds of failed attempts on the dual core VM provided by the course after my apple laptop AND windows PC both failed to knit. 
+I did not feel like getting r-studio set up on ubuntu though I expect it's probably the easiest environment to use it in.
+
+If you desire to reproduce any of this, I highly recommend *nix based environments as long as it's not apple silicon.
+avoid windows.
+I did not feel like fighting with Rosetta2 any more than I already did to get this functional.
+
+# Introduction to working with Bioinformatics data (Data Wrangling, Tidyverse) {.tabset}
+
+garbage in -> garbage out.
+
+
+## Data Wrangling{.tabset}
+There are two views for this tab. One is to view each command learned in this section but in a presentable view. The second is to view the raw code I typed along with the videos on Dr. Vandenbrink's youtube(the same as in Praxis)
+```{r wranglinLogo, echo=TRUE}
+################################################################################
+# ~ ~                         .~~~~`\~~\                                  ~ ~  #
+# ~ ~                        ;       ~~ \                                 ~ ~  #
+# ~ ~                       |           ;                                 ~ ~  #  
+# ~ ~                   ,--------,______|---.                             ~ ~  #
+# ~ ~                  /          \-----`    \                            ~ ~  #
+# ~ ~                  `.__________`-_______-'                            ~ ~  #
+#      ____        __           _       __                       ___      _    #
+#     / __ \____ _/ /_____ _   | |     / /________ _____  ____ _/ (_)___ ( )   #
+#    / / / / __ `/ __/ __ `/   | | /| / / ___/ __ `/ __ \/ __ `/ / / __ \|/    #
+#   / /_/ / /_/ / /_/ /_/ /    | |/ |/ / /  / /_/ / / / / /_/ / / / / / /      #
+#  /_____/\__,_/\__/\__,_/     |__/|__/_/   \__,_/_/ /_/\__, /_/_/_/ /_/       #
+#                                                      /____/                  #
+## Michael J.Foster ~                                    ~ github.com/mjfos2r ##
+################################################################################
+```
+
+### introduction
+```{r datawrangling, echo=TRUE}
+
+#comment added to reflect that this is installed during initialization/depchecks
+library(tidyverse)
+
+#^didn't work, gives this. make sure its installed first and the platform you're on supports it.
+#Apple Silicon is still an uphill battle.
+
+#> library(tidyverse)
+#── Attaching packages ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.3.1 ──
+#✔ ggplot2 3.3.6     ✔ purrr   0.3.4
+#✔ tibble  3.1.7     ✔ dplyr   1.0.9
+#✔ tidyr   1.2.0     ✔ stringr 1.4.0
+#✔ readr   2.1.2     ✔ forcats 0.5.1
+#── Conflicts ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+#✖ dplyr::filter() masks stats::filter()
+#✖ dplyr::lag()    masks stats::lag()
+
+#install.packages(tidyverse)
+#also didnt work^
+#install.packages(tidyverse)
+#also didnt work
+#install.packages("nycflights13")
+#this worked.
+
+#whats is it?
+#??flights
+
+#comment added to reflect that this is installed during initialization/depchecks
+my_data <- nycflights13::flights
+head(my_data)
+
+#first we will just look at data for 14-oct
+#lets filter out the stuff we don't need.
+filter(my_data, month == 10, day == 14)
+#lets move the filtered ata to a new variable
+oct_14_flight <- filter(my_data, month == 10, day == 14)
+print(oct_14_flight)
+#what if you want to do both, print and save variable?
+(oct_14_flight <- filter(my_data, month == 1, day ==3))
+
+##if we don't use the == to mean equals we get this:
+#(oct_14_flight <- filter(my_data, month = 1, day =3))
+
+#Symbol usage
+# equals ==
+# not equal to !==
+# great than >
+# less than <
+# greateer than or equal to >=
+# less than or equal to <=
+
+(flight_through_september <- filter(my_data, month < 10))
+(flight_after_september <- filter(my_data, month >= 10))
+
+##can use logical operators to be more selective
+# and &
+# or |
+# not !
+
+#lets use "or" to pick flights in march and april
+March_April_Flights <- filter(my_data, month == 3 | month == 4)
+print(March_April_Flights)
+#lets use and now.
+March_April_Flights <- filter(my_data, month == 3 & month == 4)
+#cant use and, it cant be in two places at once.
+#now lets use days.
+march_4th_flights <- filter(my_data, month == 3 & day == 4)
+#now lets use not 
+non_jan_flights <- filter(my_data, month != 1)
+```
+### Arrange
+```{r dwrangleArrange, echo = TRUE}
+#############################
+# Arrange
+#############################
+
+#arrange allows us to arrange the dataset based on the variables we call.
+arrange(my_data, year, day, month)
+
+#we can also do this in descending fashion
+descending <- arrange(my_data, desc(year), desc(day), desc(month))
+
+#missing values are always placed at tge ebd of the dataframe regardless of ascending or descending
+```
+### Select
+```{r dwrangleSelect, echo = TRUE}
+##############################
+# Select
+##############################
+
+# we can also select specific coluns that we want to look at 
+calendar <- select(my_data, year, month, day)
+print(calendar)
+
+# we can also look at a range of colummns 
+calendar2 <- select(my_data, year:day)
+print(calendar2)
+
+#lets look at all columns months through carrier
+calendar3 <- select(my_data, month:carrier)
+
+# we can also choose which columns NOT to include
+#can use - less operator in this instance.
+
+everything_else <- select(my_data, -(year:day))
+print(everything_else)
+
+#can use ! not operator in this instance.
+everything_else2 <- select(my_data, !(year:day))
+# - and ! give same output in this case  but not always interchangable
+
+# HELPER FUNCTIONS 
+#here are some other helper functions that can help you select columns or data that you are looking for
+# """
+# starts_with("xyz") -- will select the values that start with xyz
+# ends_with("xyz") -- will select the values that end with xyz
+# contains("xyz") -- will select the values that contain xyz. 
+# **ONLY SELECTS "XYZ" and not FOR EACH OUT OF ORDER. STRINGS ARE KEPT IN ORDER. STRING ORDER IS PRESERVED.
+# matches("xyz") -- kind of like contains but it has to match identically.
+```
+### renaming
+```{r dwrangleRename, echo = TRUE}
+############
+# Renaming #
+############
+
+head(my_data)
+#first variable is the new name #### rename(<data>, <newname> = <old_name>)
+rename(my_data, departure_time = dep_time)
+# be careful with renaming as you will have to re-run the entire thing again to get the original back.
+# rename to temp/whatever.
+mydata2 <- rename(my_data, departure_time = dep_time)
+view(my_data)
+```
+### Mutation Station
+```{r dwranglemutation, echo = TRUE}
+# ▄▀▀▄ ▄▀▄  ▄▀▀▄ ▄▀▀▄  ▄▀▀▀█▀▀▄  ▄▀▀█▄   ▄▀▀▀█▀▀▄  ▄▀▀█▄▄▄▄ 
+#█  █ ▀  █ █   █    █ █    █  ▐ ▐ ▄▀ ▀▄ █    █  ▐ ▐  ▄▀   ▐ 
+#▐  █    █ ▐  █    █  ▐   █       █▄▄▄█ ▐   █       █▄▄▄▄▄  
+#  █    █    █    █      █       ▄▀   █    █        █    ▌  
+#▄▀   ▄▀      ▀▄▄▄▄▀   ▄▀       █   ▄▀   ▄▀        ▄▀▄▄▄▄   
+#█    █               █         ▐   ▐   █          █    ▐   
+#▐    ▐               ▐                 ▐          ▐        
+
+#still using airplane data
+
+#what if you want new columns? theres a mutation for that :)
+
+#lets make a smaller dataframe to be able to see whats going on.
+
+my_data_small <- select(my_data, year:day, distance, air_time)
+
+#lets calculate the speed of the flights
+#ltes mutate a speed onto it
+
+mutate(my_data_small, speed = distance / air_time * 60)
+
+#not saved to variable, lets add this to the small dataset
+
+my_data_small <- mutate(my_data_small, speed = distance / air_time * 60)
+
+#what if we wanted to make a new dataframe with only the calculations.
+#lets use transmute() then.
+
+airspeed <- transmute(my_data_small, speed = distance / air_time * 60, speed2 = distance / air_time)
+```
+### Summarize & grouping
+```{r dwrangleSumGrp, echo = TRUE}
+#####################################
+# summarize and by_group()
+#####################################
+
+# we can use summarize to run a function on a datacolumn to get a single return
+summarize(my_data, delay = mean(dep_delay, na.rm = TRUE))
+
+#avg delay is ~12 mins.
+
+#lets get more value in summarize by pairing it with by_group()
+by_day <- group_by(my_data, year, month, day)
+summarize(by_day, delay = mean(dep_delay, na.rm = TRUE))
+
+# as you can see we now have the delay by the days of the year
+```
+### Dealing With NAs, counts, and pipes
+```{r dwrangleNAs, echo = TRUE}
+######################################
+# missing data
+######################################
+
+#what happens if R doesn't know what to do about missing data?
+summarize(by_day, delay = mean(dep_delay))
+#too many NAs 
+#gotta use na.rm = TRUE
+
+!is.na(airspeed)
+
+# we can also filter data by NAs (which in this dataset is canceled flights)
+not_canceled <- filter(my_data, !is.na(dep_delay), !is.na(arr_delay))
+
+# lets run summarize again on the not_canceled data
+summarize(not_canceled, delay = mean(dep_delay))
+
+#####################################################
+# counts
+#####################################################
+
+#we can also count the num of variables that are NA
+
+sum(is.na(my_data$dep_delay))
+#returns 8255
+
+# we can also count the numbers that are NOT NA
+
+sum(!is.na(my_data$dep_delay))
+#returns 328521
+
+#####################################################
+# Pipe it up
+#####################################################
+
+# piping up some tibbles. we can pipe results to get rid of the need to use the dollar sign
+# we can then summarize the number of flights by minutes delayed
+
+my_data %>%
+  group_by(year, month, day) %>%
+  summarize(mean = mean(dep_time, na.rm = TRUE))
+#I like pipes. I like unix. I wish the pipe wasn't so stupid. %>%
+```
+
+## Tidyverse{.tabset}
+```{r tvLogo, echo = TRUE}
+###########################################################################
+# ████████╗██╗██████╗ ██╗   ██╗██╗   ██╗███████╗██████╗ ███████╗███████╗
+# ╚══██╔══╝██║██╔══██╗╚██╗ ██╔╝██║   ██║██╔════╝██╔══██╗██╔════╝██╔════╝
+#    ██║   ██║██║  ██║ ╚████╔╝ ██║   ██║█████╗  ██████╔╝███████╗█████╗  
+#    ██║   ██║██║  ██║  ╚██╔╝  ╚██╗ ██╔╝██╔══╝  ██╔══██╗╚════██║██╔══╝  
+#    ██║   ██║██████╔╝   ██║    ╚████╔╝ ███████╗██║  ██║███████║███████╗
+#    ╚═╝   ╚═╝╚═════╝    ╚═╝     ╚═══╝  ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝
+##########################################################################
+```
+### Tibbles
+```{r tibbles, echo=TRUE}
+#    ████████╗██╗██████╗ ██████╗ ██╗     ███████╗███████╗
+#    ╚══██╔══╝██║██╔══██╗██╔══██╗██║     ██╔════╝██╔════╝
+#       ██║   ██║██████╔╝██████╔╝██║     █████╗  ███████╗
+#       ██║   ██║██╔══██╗██╔══██╗██║     ██╔══╝  ╚════██║
+#       ██║   ██║██████╔╝██████╔╝███████╗███████╗███████║
+#       ╚═╝   ╚═╝╚═════╝ ╚═════╝ ╚══════╝╚══════╝╚══════╝
+#########
+# make sure the library is initialized/imported.
+library(tibble)
+# now we will explore tibbles. tibbles are modified dataframes which tweak some things that are 
+# older features from dataframes. R is an old language and useful things from 20 years ago are not 
+# as useful anymore. 
+
+as_tibble(iris)
+# as we can see there is the same data frame but with different features. 
+
+# what about building tibbles from scratch?
+# use tibble()
+
+tibble(
+  x = 1:5,
+  y = 1,
+  z = x ^ 2 + y
+)
+# aside: I wish this allowed me to do function defs the right way, aka K&R C syntax...
+# function
+#    (
+#     code()
+#    )
+```
+### Tribbles
+```{r tribble, echo = TRUE}
+# ████████╗██████╗ ██╗██████╗ ██████╗ ██╗     ███████╗███████╗
+# ╚══██╔══╝██╔══██╗██║██╔══██╗██╔══██╗██║     ██╔════╝██╔════╝
+#    ██║   ██████╔╝██║██████╔╝██████╔╝██║     █████╗  ███████╗
+#    ██║   ██╔══██╗██║██╔══██╗██╔══██╗██║     ██╔══╝  ╚════██║
+#    ██║   ██║  ██║██║██████╔╝██████╔╝███████╗███████╗███████║
+#    ╚═╝   ╚═╝  ╚═╝╚═╝╚═════╝ ╚═════╝ ╚══════╝╚══════╝╚══════╝
+########## 
+# in addition to tibble(), there's also tRibble(). it appears to be a basic table constructor based on how I define the rough layout.
+# seems convenient
+tribble(  
+  ~ genea, ~ geneb, ~ genec,
+  ##########################
+  110,      112,      114,
+  6,        5,        4,
+)
+
+# tibbles are built to give mercy to std::out or whatever the R equivalent is called for the console.
+
+# example from lecture:
+# "this is how a data frame prints to std::out"
+print(by_day)
+# 300,000 rows. oof.
+as.data.frame(by_day)
+# oof still a lot of output.
+head(by_day)
+# marginally better.
+
+# okay now to show the above but with tibbles.
+
+nycflights13::flights %>%
+  print(n=10, width = Inf)
+# prints first ten rows and then every column for those 10 rows.
+# can filter headers and metadata from large datasets? //probably.
+
+#####################################################
+# subsetting
+#####################################################
+
+# subsetting tibbles is easy, similar to data.frames
+# lets load a tibble with flightdata
+df_tibble <- tibble(nycflights13::flights)
+# now lets print the tibble to console.
+df_tibble
+
+# we can subset by column name using the $
+
+# first lets subset by carrier.
+df_tibble$carrier
+
+# we can also subset by position using [[subset]]
+df_tibble[[2]]
+# I can already see how this is very useful for sequence analysis/molecular bio experiments in general.
+
+# if you want to pipe this, must use "." as placeholder.
+# follows unix style "period means current directory/stream/etc" 
+
+df_tibble %>%
+  .$carrier
+
+###################################################
+#             LEGACY COMPATIBILITY                #
+#             (at least it isn't python2)         #
+###################################################
+# now to legacy features that are not tibbles and do not like them and won't work with them
+# conversion from tibble to dataframe for legacy functions is prob required.
+# or just rewrite it using tibbles :)
+
+class(df_tibble)
+#> class(df_tibble)
+#[1] "tbl_df"     "tbl"        "data.frame"
+
+# okay so the conversion function isn't as painful as I expected.
+df_tibble_2 <- as.data.frame(df_tibble)
+
+class(df_tibble_2)
+#> class(df_tibble_2)
+#[1] "data.frame"
+
+head(df_tibble_2)
+# cool, finally grokking the abstraction I think.
+
+# do the above if a package is obsolete and won't work with tibbles.
+```
+### Tidy R{.tabset}
+```{r tidyr, echo = TRUE}
+###########################################
+# ████████╗██╗██████╗ ██╗   ██╗██████╗ 
+#  ══██╔══╝██║██╔══██╗╚██╗ ██╔╝██╔══██╗
+#    ██║   ██║██║  ██║ ╚████╔╝ ██████╔╝
+#    ██║   ██║██║  ██║  ╚██╔╝  ██╔══██╗
+#    ██║   ██║██████╔╝   ██║   ██║  ██║
+#    ╚═╝   ╚═╝╚═════╝    ╚═╝   ╚═╝  ╚═╝
+###########################################
+
+# getting the hang of this ASCII art :P
+
+# okay lets bring in the tidyverse library
+library(tidyverse)
+
+# okay, how do I make a tidy dataset?
+# three main rules: 
+# 1. one column for each variable
+# 2. one row for each observation
+# 3. one cell for each value
+
+# it's impossible to immediately satisfy two of the three rules
+# thus, perform the following:
+# 1. tibble <- dataset
+# 2. column <- variable
+# 3. ???
+# 4. profit
+
+# consistency is key to understanding what's going on under the hood.
+# lets get to rockin' with tibbles now.
+
+# okay so new variable BMI and assign it a tibble with data women
+bmi <- tibble(women)
+
+# now lets mutate the tibble 
+
+bmi %>%
+  mutate(bmi - (703 * weight)/(height)^2)
+# neat!
+```
+#### Gather and Spread{.tabset}
+##### Gather
+```{r gather, echo = TRUE}
+#####################################################
+# gather
+#####################################################
+
+# what if datasets don't fit into a tibble?
+# built-in tidyverse data for the following:
+
+table4a
+# okay it appears to be regarding countries and something else.
+
+# there is one variable in column A = country
+# columns 2 and 3 are two of the same. Thus, two observations in each row. 
+# in violation of rule 2.
+# lets fix that
+# gather them observations up.
+
+table4a %>%
+  gather('1999','2000', key = 'year', value = 'cases')
+
+# okay another built in example
+
+table4b
+
+# SAME ISSUE
+# its okay, we can fix it the same way.
+
+table4b %>%
+  gather("1999", "2000", key = "year", value = "population")
+
+# now to combine the tables together using dplyr
+
+table4a <- table4a %>%
+  gather('1999','2000', key = 'year', value = 'cases')
+table4b <- table4b %>%
+  gather("1999", "2000", key = "year", value = "population")
+
+# and now to left-join the two together
+
+left_join(table4a, table4b)
+```
+##### Spread
+```{r spreadtv, echo=TRUE}
+#####################################################
+# spread
+#####################################################
+
+# first you gather, then you spread
+
+table2
+
+# same issue as before. redunancies in columns 1 and 2. 
+# okay so now we combine the rows 1+2, 3+4
+
+spread(table2, key = type, value = count)
+
+# much much much better.
+# type = the key of what's being turned into columns, the value turns into rows
+# and observations.
+# tl;dr 
+# spread = loooooong turns to short n wide
+# gather = wiiiiiide turns to narrow n long
+```
+##### Separate and Pull
+```{r sepnpul, echo=TRUE}
+#####################################################
+# separate and pull
+#####################################################
+
+# now what about two observations in one column? 
+
+table3
+
+# rate = population + cases
+# We can use separate files to fix this.
+
+table3 %>%
+  separate(rate, into = c("cases","population"))
+
+# However, the column type is not correct.
+
+table3 %>%
+  separate(rate, into = c("cases","populate"), conver = TRUE)
+
+# You can specify separation delim.
+
+table3 %>%
+  separate(rate, into = c("cases", "populate"), sep = "/", conver = TRUE)
+
+# Let's make this look like humans wrote it.
+
+table3 %>%
+  separate(
+    year,
+    into = c("cases","population"),
+    convert = TRUE,
+    sep = 2
+  )
+
+```
+##### Unite
+```{r unitetdr, echo=TRUE}
+#####################################################
+# unite
+#####################################################
+
+# what about doing the inverse of separate?
+
+table5
+
+table5 %>%
+  unite(date, century, year)
+
+table5 %>%
+  unite(date, century, year, sep = "")
+```
+##### Missing Values
+```{r trmv, echo=TRUE}
+#####################################################
+# missing values
+#####################################################
+
+# There can be two types of missing values. NA (explicit) or just no entry (implicit)
+
+gene_data <- tibble(
+  gene = c('a', 'a', 'a', 'a', 'b', 'b', 'b'),
+  nuc = c(20, 22, 24, 25, NA, 42, 67),
+  run = c(1,2,3,4,2,3,4)
+)
+
+gene_data
+
+# The nucleotide count for gene b run 2 is explicitly missing.
+# The nucleotide count for gene b run 1 is implicitly missing.
+
+# One way we can make implicit missing values explicit is by putting runs in columns
+
+gene_data %>%
+  spread(gene, nuc)
+
+# If we want to remove the missing values, we can use spread and gather, and na.rm = TRUE
+
+gene_data %>%
+  spread(gene, nuc) %>%
+  gather(gene, nuc, 'a':'b', na.rm = TRUE)
+# na.rm is what helped me deal with louisiana LDH data....... so many NAs....
+
+# Another way is to force implicit values into explicit, via complete()
+
+gene_data %>%
+  complete(gene, run)
+
+# Sometimes an NA is present to represent a value being carried forward.
+
+treatment <- tribble(
+  ~person,     ~treatment,     ~response,
+  ###########################################
+  "Isaac",            1,              7,
+  NA,                 2,              10,
+  NA,                 3,              9, 
+  "VDB",              1,              8,
+  NA,                 2,              11,
+  NA,                 3,              10,
+)
+
+# as seen above, this isn't the bad type of NA, but rather a way of reserving 
+# rows for the person listed above.
+
+treatment
+
+# lets use fill() to drag down the above person to their respective NA values
+
+treatment %>%
+  fill(person)
+```
+### DPLYR
+```{r dplyrsec, echo=TRUE}
+#####################################################
+#     ██████╗ ██████╗ ██╗  ██╗   ██╗██████╗     
+#     ██╔══██╗██╔══██╗██║  ╚██╗ ██╔╝██╔══██╗    
+#     ██║  ██║██████╔╝██║   ╚████╔╝ ██████╔╝    
+#     ██║  ██║██╔═══╝ ██║    ╚██╔╝  ██╔══██╗    
+#     ██████╔╝██║     ███████╗██║   ██║  ██║    
+#     ╚═════╝ ╚═╝     ╚══════╝╚═╝   ╚═╝  ╚═╝#
+#####################################################
+
+# It is rare that you will be working with a single data table.  
+# DPLYR allows for joining two tables via common values
+
+# Mutate joins - add new variables to one data.frame from the same obs in another
+# Filtering joins - filtering observations from one data frame based on presence
+#                   in the other 
+# Set operations - treats observations as set elements.
+
+library(tidyverse)
+library(nycflights13)
+
+# Let's pull carrier names by letter codes
+airlines
+
+# Let's pull airport info
+airports
+
+# plane info?
+planes
+
+# what about weather?
+weather
+
+# individual flights?
+flights
+
+# Let's look at how these tables connect
+
+# Flights -> planes by tailnumber
+# Flights -> airlines by carrier
+# Flights -> airport origin and destination
+# Flights -> weather via origin, year/month/day/hour
+
+#####################################################
+# Keys
+#####################################################
+
+# Keys = unique identifiers per observation
+# Primary key uniquely identifies an observation in it's own table.
+
+# One way to identify a primary key:
+
+planes %>%
+  count(tailnum) %>%
+  filter(n>1)
+# This indicates that the tailnumber is unique
+
+# now lets filter by model of plane
+planes %>%
+  count(model) %>%
+  filter(n>1)
+# neat
+
+#####################################################
+# Mutate join
+#####################################################
+
+Flights2 <- flights %>%
+  select(year:day, hour, origin, dest, tailnum, carrier)
+
+Flights2
+
+Flights2 %>%
+  select(-origin, -dest) %>%
+  left_join(airlines, by = 'carrier')
+
+# We've now added the airline name to our dataframe from the airline dataframe
+
+# Other types of joins
+
+# Inner joins (inner_join) matches a pair of observations when their key is equal
+# Outer joins (outer_join) keeps observations that appear in at least one table.
+```
+### STRINGR
+```{r stringr, echo=TRUE}
+#####################################################
+#███████╗████████╗██████╗ ██╗███╗   ██╗ ██████╗ ██████╗ 
+#██╔════╝╚══██╔══╝██╔══██╗██║████╗  ██║██╔════╝ ██╔══██╗
+#███████╗   ██║   ██████╔╝██║██╔██╗ ██║██║  ███╗██████╔╝
+#╚════██║   ██║   ██╔══██╗██║██║╚██╗██║██║   ██║██╔══██╗
+#███████║   ██║   ██║  ██║██║██║ ╚████║╚██████╔╝██║  ██║
+#╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝
+#####################################################
+
+library(tidyverse)
+library(stringr)
+
+# strings are made using single or double quotes
+
+string1 <- "this is a string"
+string2 <- ' to put a "quote" in your string, use the opposite'
+
+# now feed them to the output console
+string1
+string2
+
+# If you forget to close your string, you'll get this:
+
+string3 <- "where is this string going?"
+
+string3
+
+# Just hit escape and try again
+
+# Multiple strings are stored as char vectors
+
+string4 <- c("one", "two", "three")
+string4
+
+# Measuring string length
+
+str_length(string3)
+
+str_length(string4)
+
+# combining two strings
+
+str_c("x","y")
+
+str_c(string1, string2)
+
+# You can use sep to set the delim
+
+str_c("x", "y", "z", sep = " ")
+
+str_c("x", "y", "z", sep = "_")
+
+#####################################################
+# Subsetting strings
+#####################################################
+
+# lets subset a string with str_sub()
+
+HSP <- c("HSP123", "HSP234", "HSP456")
+
+str_sub(HSP, 4,6)
+
+# first four letters are dropped
+
+# Or you can use negatives to count back from the end
+
+str_sub(HSP, -3, -1)
+
+# You can convert the cases of strings like follows:
+
+HSP
+str_to_lower(HSP)
+
+# str_to_upper()
+
+
+#####################################################
+# RegEx
+#####################################################
+
+install.packages("htmlwidgets")
+
+x <- c('ATTAGA', 'CGCCCCCGGGAT', 'TATTA')
+
+str_view(x,"G")
+
+str_view(x, "TA")
+
+# The next step is, "." where the "." matches an entry
+
+str_view(x,".G.")
+
+# Anchors allow you to match at the start or the ending
+str_view(x, "^TA")
+
+str_view(x, "TA$")
+
+# Character classes/alternatives
+
+# \d matches any digit
+# \s matches any space
+# [abc] matches a, b, or c
+
+str_view(x, "TA[GT]")
+
+# [^abc] matches anything BUT a, b, or c
+str_view(x, "TA[^T]")
+
+# You can also use | to pick between two alternatives
+str_view(x, "TA[G|T]")
+```
+## Click here to clear this section
+
+# Bioinformatics {.tabset}
+```{r bioinfologo, echo=TRUE}
+#                                                   _*_     +    /\  +   .
+#                              +     -*-.    +       .        * /**\ 
+#  .    _     *       \|/   .       .      -*-   .             /****\ * /\   +
+#    .' \\`.     +    -*-     *-. .-.   .-. .-.   .-. .-.   . /      \ /**\   
+# .  |__''_|  .       /|\ +      \   \ /   \   \ /   \   \ / /  /\    /    \    
+#    |     | .                  / \   \   / \   \   / \   \ /  /  \  /      \                      
+#    |     |           `  .    ~   `-~ `-`   `-~ `-`   `-~ `- /    \/ /\     \  
+#  _.'-----'-._     *           .         '       .   *   /  /      \/  \/\   \    
+#/             \__.__.--.________________________________/__/_______/___/__\___\
+```
+***
+## Microarrays
+```{r microarrlogo, echo=TRUE}
+#███╗   ███╗██╗ ██████╗██████╗  ██████╗  █████╗ ██████╗ ██████╗  █████╗ ██╗   ██╗
+#████╗ ████║██║██╔════╝██╔══██╗██╔═══██╗██╔══██╗██╔══██╗██╔══██╗██╔══██╗╚██╗ ██╔╝
+#██╔████╔██║██║██║     ██████╔╝██║   ██║███████║██████╔╝██████╔╝███████║ ╚████╔╝ 
+#██║╚██╔╝██║██║██║     ██╔══██╗██║   ██║██╔══██║██╔══██╗██╔══██╗██╔══██║  ╚██╔╝  
+#██║ ╚═╝ ██║██║╚██████╗██║  ██║╚██████╔╝██║  ██║██║  ██║██║  ██║██║  ██║   ██║  
+#╚═╝     ╚═╝╚═╝ ╚═════╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝  
+```
+```{r Microarrays, echo = TRUE}
+#This was originally in sections but it refused to knit unless contiguous 
+BiocManager::install("affy")
+# Limma Microarray Analysis
+
+setwd("~/Desktop/classroom/myfiles")
+#setwd("~/Desktop/classroom/myfiles")
+
+
+library(ath1121501cdf)
+library(ath1121501.db)
+library(annotate)
+library(affy)
+library(limma)
+library(oligo)
+library(dplyr)
+library(stats)
+library(reshape)
+
+######### Read the cell files into the directory
+
+targets <- readTargets("Bric16_Targets.csv", sep = ",", row.names = "filename")
+
+ab <- ReadAffy()
+
+##############
+hist(ab)
+
+# Normalizing the microarray experiments
+
+eset <- affy::rma(ab)
+
+pData(eset)
+
+# Let's visualize the normalized data
+hist(eset)
+
+###################################
+# Let's characterize the data a bit
+
+ID <- featureNames(eset)
+Symbol <- getSYMBOL (ID, "ath1121501.db")
+affydata <- read.delim("affy_ATH1_array_elements.txt")
+
+########################################
+# Differential Gene Expression Analysis
+########################################
+
+# Flight vs. Ground
+
+condition <- targets$gravity
+
+design <- model.matrix((~factor(condition)))
+colnames(design) <- c("ground","flight")
+lmFit(eset,design)
+fit <- lmFit(eset, design)
+fit <- eBayes(fit)
+options(digits = 2)
+top <- topTable(fit, coef =2, n=Inf, adjust= 'fdr')
+
+############################
+# Let's combine annotations
+############################
+
+Annot <- data.frame(GENE = sapply(contents(ath1121501GENENAME), paste, collapse = ","),
+                    KEGG = sapply(contents(ath1121501PATH), paste, collapse = ","),
+                    GO = sapply(contents(ath1121501GO), paste, collapse = ","),
+                    SYMBOL = sapply(contents(ath1121501SYMBOL), paste, collapse = ","),
+                    ACCNUM = sapply(contents(ath1121501ACCNUM), paste, collapse = ","))
+
+# Let's merge all the data into one dataframe
+all <- merge(Annot, top, by.x = 0, by.y = 0, all = TRUE)
+
+all2 <- merge(all, affydata, by.x = "Row.names", by.y = "array_element_name")
+
+# Let's convert the ACCNUM to a character value
+all2$ACCNUM <- as.character(all2$ACCNUM)
+
+write.table(all2, file="BRIC_16_Final.csv", row.names = TRUE, col.names = TRUE, sep ="\t")
+
+
+columns(org.At.tair.db)
+
+foldchanges <- as.data.frame(all2$logFC)
+
+all2$entrez = mapIds(org.At.tair.db, 
+                     keys = all2$ACCNUM, 
+                     column = "ENTREZID", 
+                     keytype = "TAIR", 
+                     multivals = "first")
+
+head(all2, 10)
+
+
+###############################################################################
+# ██████╗  █████╗ ████████╗██╗  ██╗██╗   ██╗██╗███████╗██╗    ██╗
+# ██╔══██╗██╔══██╗╚══██╔══╝██║  ██║██║   ██║██║██╔════╝██║    ██║
+# ██████╔╝███████║   ██║   ███████║██║   ██║██║█████╗  ██║ █╗ ██║
+# ██╔═══╝ ██╔══██║   ██║   ██╔══██║╚██╗ ██╔╝██║██╔══╝  ██║███╗██║
+# ██║     ██║  ██║   ██║   ██║  ██║ ╚████╔╝ ██║███████╗╚███╔███╔╝
+# ╚═╝     ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝  ╚═══╝  ╚═╝╚══════╝ ╚══╝╚══╝ 
+###############################################################################
+
+library(pathview)
+library(gage)
+library(gageData)
+data(kegg.sets.hs)
+
+foldchanges = all2$logFC
+names(foldchanges) = all2$entrez
+
+head(foldchanges)
+
+kegg.ath = kegg.gsets("ath", id.type = "entrez")
+kegg.ath.sigmet = kegg.ath$kg.sets[kegg.ath$sigmet.idx]
+
+# Let's get the results
+keggres = gage(foldchanges, gsets=kegg.ath.sigmet, same.dir = TRUE)
+
+lapply(keggres, head)
+
+greater <- keggres$greater
+lessers <- keggres$less
+
+write.csv(greater, file = "BRIC_16_pathview_Greater_Pathways.csv")
+write.csv(lessers, file = "BRIC_16_pathview_Lesser_Pathways.csv")
+
+###############################################################################
+# Let's Map to Pathways (Greater)
+###############################################################################
+
+keggrespathways = data.frame(id=rownames(keggres$greater), keggres$greater) %>%
+  tbl_df() %>%
+  filter(row_number() <=5) %>%
+  .$id %>%
+  as.character()
+keggrespathways
+keggresids_greater =substr(keggrespathways, start=1, stop=8)
+keggresids_greater
+genedata <- as.character(all2$logFC)
+
+# Define plotfunct to use next:
+plot_pathway = function(pid) pathview(gene.data=foldchanges, pathway.id = pid, species = "ath", new.signature = FALSE)
+
+# Plot Multiple Pathways (Plots are Saved to Disk and Returns a Throwaway Object List)
+tmp = sapply(keggresids_greater, function(pid) pathview(gene.data = foldchanges, pathway.id = pid, species = "ath"))
+
+###############################################################################
+# Let's Map to Pathways (Lesser)
+###############################################################################
+
+keggrespathways = data.frame(id=rownames(keggres$less), keggres$less) %>%
+  tbl_df() %>%
+  filter(row_number() <=5) %>%
+  .$id %>%
+  as.character()
+keggrespathways
+
+keggresids_less =substr(keggrespathways, start=1, stop=8)
+keggresids_less
+
+genedata <- as.character(all2$logFC)
+
+# Define a Plotting Function to Apply Next 
+
+plot_pathway = function(pid) pathview(gene.data=foldchanges, pathway.id = pid, species = "ath", new.signature = FALSE)
+
+# Plot Multiple Pathways (Plots are Saved to Disk and Returns a Throwaway Object List)
+tmp = sapply(keggresids_less, function(pid) pathview(gene.data = foldchanges, pathway.id = pid, species = "ath"))
+```
+***
+## RNASeq{.tabset}
+```{r rnaseqlogo, echo=TRUE}
+##-.       .-.       .-.       .-.       .-.       .-.           
+#||\     /|||\     /|||\     /|||\     /|||\     /|||\     
+#   \|||\|    \|||\|    \|||\|    \|||\|    \|||\|    \|||\|
+#~   `-~ `     `-~ `     `-~ `~    `-~ `     `-~ `     `-~ `
+#     ██████╗ ███╗   ██╗ █████╗ ███████╗███████╗ ██████╗ 
+#     ██╔══██╗████╗  ██║██╔══██╗██╔════╝██╔════╝██╔═══██╗
+#     ██████╔╝██╔██╗ ██║███████║███████╗█████╗  ██║   ██║
+#     ██╔══██╗██║╚██╗██║██╔══██║╚════██║██╔══╝  ██║▄▄ ██║
+#     ██║  ██║██║ ╚████║██║  ██║███████║███████╗╚██████╔╝
+#     ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝╚══════╝ ╚══▀▀═╝ 
+#-.       .-.       .-.       .-.       .-.       .-.           
+#||\     /|||\     /|||\     /|||\     /|||\     /|||\     
+#   \|||\|    \|||\|    \|||\|    \|||\|    \|||\|    \|||\|
+#~   `-~ `     `-~ `     `-~ `~    `-~ `     `-~ `     `-~ ` 
+```
+### EdgeR
+```{r edger1, echo=TRUE}
+#███████╗██████╗  ██████╗ ███████╗    ██████╗ 
+#██╔════╝██╔══██╗██╔════╝ ██╔════╝    ██╔══██╗
+#█████╗  ██║  ██║██║  ███╗█████╗      ██████╔╝
+#██╔══╝  ██║  ██║██║   ██║██╔══╝      ██╔══██╗
+#███████╗██████╔╝╚██████╔╝███████╗    ██║  ██║
+#╚══════╝╚═════╝  ╚═════╝ ╚══════╝    ╚═╝  ╚═╝
+#########
+
+library("edgeR")
+library("dplyr")
+library("AnnotationDbi")
+library("org.Mm.eg.db")
+```
+```{r edger2, echo=TRUE}
+
+rawdata= read.csv("GLDS-102_rna_seq_Normalized_Counts.csv", row.names = "gene_id")
+
+group <- factor(c('1', '1', '1', '1', '1', '1', '2', '2', '2', '2', '2', '2'))
+
+dgeGlm <- DGEList(counts = rawdata, group = group)
+str(dgeGlm)
+
+keep <- rowSums(cpm(dgeGlm)>2) >=4
+
+dgeGlm <- dgeGlm[keep,]
+
+names(dgeGlm)
+
+dgeGlm[["samples"]]
+
+design <- model.matrix(~group)
+design
+
+dgeGlmComDisp <- estimateGLMCommonDisp(dgeGlm, design, verbose = TRUE)
+
+dgeGlmTrendDisp <- estimateGLMTrendedDisp(dgeGlmComDisp, design)
+
+dgeGlmTagDisp <- estimateGLMTagwiseDisp(dgeGlmTrendDisp, design)
+
+plotBCV(dgeGlmTagDisp)
+
+fit <- glmFit(dgeGlmTagDisp, design)
+
+colnames(coef(fit))
+
+lrt <- glmLRT(fit, coef =2)
+
+ttGlm <- topTags(lrt, n = Inf)
+
+class(ttGlm)
+```
+```{r edger3, echo=TRUE}
+summary(deGlm <- decideTestsDGE(lrt, p = 0.1, adjust = "fdr"))
+
+tagsGlm <- rownames (dgeGlmTagDisp)[as.logical(deGlm)]
+
+plotSmear(lrt, de.tags = tagsGlm)
+
+hits2 <- ttGlm$table[ttGlm$table$FDR < 0.1, ]
+
+write.csv(hits2, "Mouse_EdgeR_Results_Zero_vs_1.csv")
+
+```
+```{r edger4, echo=TRUE}
+
+columns(org.Mm.eg.db)
+
+ttGlm2 <- as.data.frame(ttGlm$table)
+
+ttGlm2$symbol = mapIds(org.Mm.eg.db,
+                       keys=row.names(ttGlm2),
+                       column = "SYMBOL",
+                       keytype = "ENSEMBL",
+                       multivals = "first")
+ttGlm2$entrez = mapIds(org.Mm.eg.db,
+                       keys=row.names(ttGlm2),
+                       column = "SYMBOL",
+                       keytype = "ENSEMBL",
+                       multivals = "first")
+ttGlm2$name = mapIds(org.Mm.eg.db,
+                       keys=row.names(ttGlm2),
+                       column = "GENENAME",
+                       keytype = "ENSEMBL",
+                       multivals = "first")
+
+head(ttGlm2)
+```
+```{r edger5, echo=TRUE}
+library(pathview)
+library(gage)
+library(gageData)
+data(kegg.sets.mm)
+data(go.subs.mm)
+
+foldchanges <- ttGlm2$logFC
+names(foldchanges) <- ttGlm2$entrez
+kegg.mm = kegg.gsets("mouse", id.type = "entrez")
+kegg.mm.sigmet = kegg.mm$kg.sets[kegg.mm$sigmet.idx]
+
+# Let's get the results
+keggres = gage(foldchanges, gsets=kegg.mm.sigmet, same.dir = TRUE)
+
+lapply(keggres, head)
+
+greaters <- keggres$greater
+lessers <- keggres$less
+
+```
+```{r edger6, echo=TRUE}
+
+keggrespathways = data.frame(id = rownames(keggres$greater), keggres$greater) %>%
+  tibble::as_tibble() %>%
+  filter(row_number()<=5) %>%
+  .$id %>%
+  as.character()
+keggrespathways
+
+keggresids = substr(keggrespathways, start=1, stop=8)
+keggresids
+```
+```{r edger7, echo=TRUE}
+plot_pathway = function(pid) pathview(gene.data=foldchanges, pathway.id = pid, species = "mouse", new.signature = FALSE)
+
+# Plot Multiple Pathways
+tmp = sapply(keggresids, function(pid) pathview(gene.data=foldchanges, pathway.id = pid, species = "mouse"))
+
+```
+```{r edger8, echo=TRUE}
+
+
+keggrespathways = data.frame(id = rownames(keggres$less), keggres$less) %>%
+  tibble::as_tibble() %>%
+  filter(row_number()<=5) %>%
+  .$id %>%
+  as.character()
+keggrespathways
+
+keggresids = substr(keggrespathways, start=1, stop=8)
+keggresids
+```
+```{r edger9, echo=TRUE}
+plot_pathway = function(pid) pathview(gene.data=foldchanges, pathway.id = pid, species = "mouse", new.signature = FALSE)
+
+# Plot Multiple Pathways
+tmp = sapply(keggresids, function(pid) pathview(gene.data=foldchanges, pathway.id = pid, species = "mouse"))
+
+```
+```{r edger10, echo=TRUE}
+
+library(imager)
+
+filenames <- list.files(path = "~/Desktop/classroom/myfiles", pattern = "*.pathview.png")
+filenames
+all_images <- lapply(filenames, load.image)
+
+```
+```{r edger11, echo=TRUE}
+
+knitr::include_graphics(filenames)
+print"."
+```
+### DESeq
+```{r deseq, echo = TRUE}
+#██████╗ ███████╗███████╗███████╗ ██████╗ 
+#██╔══██╗██╔════╝██╔════╝██╔════╝██╔═══██╗
+#██║  ██║█████╗  ███████╗█████╗  ██║   ██║
+#██║  ██║██╔══╝  ╚════██║██╔══╝  ██║▄▄ ██║
+#██████╔╝███████╗███████║███████╗╚██████╔╝
+#╚═════╝ ╚══════╝╚══════╝╚══════╝ ╚══▀▀═╝
+#########
+setwd("~/Desktop/classroom/myfiles")
+
+BiocManager::install("apeglm", update = FALSE)
+#BiocManager::install("DESeq2")
+#install.packages("emdbook")
+library(DESeq2)
+library("dplyr")
+library("apeglm")
+
+countData <- read.csv("GLDS-102_rna_seq_Unnormalized_Counts.csv")
+
+colData <- read.csv("PHENO_DATA_Mouse.csv", sep= ",", row.names = 1)
+
+colData$group <- factor(colData$group, levels = c("0","1"))
+
+all(rownames(colData)) %in% colnames(countData)
+
+countData %>%
+  mutate_if(is.numeric, ceiling)
+
+countData[, 2:13] <- sapply(countData[,2:13], as.integer)
+
+row.names(countData) <- countData[,1]
+
+countData <- countData[2:13]
+
+rownames(colData) ==colnames(countData)
+
+dds <- DESeqDataSetFromMatrix(countData= countData, colData = colData, design = ~group)
+
+dds <- dds[rowSums(counts(dds)>2) >=4]
+
+dds <- DESeq(dds)
+
+res <- results(dds)
+
+resLFC <- lfcShrink(dds, coef = 2)
+
+(resOrdered <- res[order(res$padj), ])
+
+summary(res)
+
+FLT_Vs_GC <- as.data.frame(res$log2FoldChange)
+
+head(FLT_Vs_GC)
+
+plotMA(resLFC, ylim = c(-2,2))
+
+pdf(file = "MA_Plot_FLT_vs_GC.pdf")
+
+dev.off()
+
+write.csv(as.data.frame(resOrdered), file = "Mouse_DESeq.csv")
+
+dds <- estimateSizeFactors(dds)
+
+se <- SummarizedExperiment(log2(counts(dds, normalize = TRUE) +1), colData = colData(dds))
+
+pdf(file = "PCA_PLOT_FLT_vs_GC.pdf")
+
+plotPCA(DESeqTransform(se), intgroup = "group")
+
+library(AnnotationDbi)
+library(org.Mm.eg.db)
+
+columns(org.Mm.eg.db)
+
+foldchanges <- as.data.frame(res$log2FoldChange, row.names = row.names(res))
+head(foldchanges)
+
+res$symbol = mapIds(org.Mm.eg.db, 
+                    keys= row.names(res),
+                    column = "SYMBOL",
+                    keytype = "ENSEMBL",
+                    multiVals = "first")
+res$entrez = mapIds(org.Mm.eg.db,
+                    keys= row.names(res),
+                    column = "ENTREZID",
+                    keytype = "ENSEMBL",
+                    multiVals = "first") 
+res$name = mapIds(org.Mm.eg.db,
+                    keys= row.names(res),
+                    column = "GENENAME",
+                    keytype = "ENSEMBL",
+                    multiVals = "first")
+
+head(res,10)
+
+library(pathview)
+library(gage)
+library(gageData)
+data(kegg.sets.mm)
+data(go.subs.mm)
+
+foldchanges <- res$log2FoldChange
+names(foldchanges) = res$entrez
+
+head(foldchanges)
+
+kegg.mm = kegg.gsets("mouse", id.type = "entrez")
+kegg.mm.sigmet <- kegg.mm$kg.set[kegg.mm$sigmet.idx]
+
+keggres <- gage(foldchanges, gsets = kegg.mm.sigmet, same.dir = TRUE)
+
+lapply(keggres, head)
+
+greaters <- keggres$greater
+lessers <- keggres$less
+
+keggrespathways <- data.frame(id = rownames(keggres$greater), keggres$greater) %>%
+  tbl_df() %>%
+  filter(row_number() <= 3) %>%
+  .$id %>%
+  as.character()
+keggrespathways
+
+keggresids <- substr(keggrespathways, start = 1, stop = 8)
+keggresids
+
+plot_pathway = function(pid) pathview(gene.data = foldchange, pathway.id = pid, species = "mouse", new.signature = FALSE)
+
+tmp = sapply(keggresids, function(pid) pathview(gene.data = foldchanges, pathway.id = pid,species = "mouse"))
+
+keggrespathways <- data.frame(id = rownames(keggres$less), keggres$less) %>%
+  tbl_df() %>%
+  filter(row_number() <= 3) %>%
+  .$id %>%
+  as.character()
+keggrespathways
+
+keggresids <- substr(keggrespathways, start = 1, stop = 8)
+keggresids
+
+plot_pathway = function(pid) pathview(gene.data = foldchange, pathway.id = pid, species = "mouse", new.signature = FALSE)
+
+tmp = sapply(keggresids, function(pid) pathview(gene.data = foldchanges, pathway.id = pid,species = "mouse"))
+
+library(imager)
+
+filenames <- list.files(path = "/home/student/Desktop/classroom/myfiles", pattern = ".*pathview.png")
+
+all_images <- lapply(filenames, load.image)
+
+knitr::include_graphics(filenames)
+print(".")
+```
+### EdgeR vs. DESeq
+```{r edgevsdeseq, echo = TRUE}
+#███████╗██████╗  ██████╗ ███████╗ ██╗   ██╗███████╗  ██████╗ ███████╗███████╗███████╗ ██████╗ 
+#██╔════╝██╔══██╗██╔════╝ ██╔════╝ ██║   ██║██╔════╝  ██╔══██╗██╔════╝██╔════╝██╔════╝██╔═══██╗
+#█████╗  ██║  ██║██║  ███╗█████╗   ██║   ██║███████╗  ██║  ██║█████╗  ███████╗█████╗  ██║   ██║
+#██╔══╝  ██║  ██║██║   ██║██╔══╝   ╚██╗ ██╔╝╚════██║  ██║  ██║██╔══╝  ╚════██║██╔══╝  ██║▄▄ ██║
+#███████╗██████╔╝╚██████╔╝███████╗  ╚████╔╝ ███████║  ██████╔╝███████╗███████║███████╗╚██████╔╝
+#╚══════╝╚═════╝  ╚═════╝ ╚══════╝   ╚═══╝  ╚══════╝  ╚═════╝ ╚══════╝╚══════╝╚══════╝ ╚══▀▀═╝ 
+#########
+
+setwd("~/Desktop/classroom/myfiles")
+
+library(tidyverse)
+
+EdgeR <- read.csv("Mouse_EdgeR_Results_Zero_vs_1.csv")
+
+DESeq <- read.csv("Mouse_DESeq.csv")
+
+DESeq2 <- DESeq %>%
+  filter(padj < 0.1)
+
+DESeq2 <- DESeq2[,c(1,3)]
+
+EdgeR <- EdgeR[, 1:2]
+
+colnames(DESeq2) <- c("ID", "logFC")
+colnames(EdgeR) <- c("ID", "logFC")
+
+library(GOplot)
+
+comp <- GOVenn(DESeq2, EdgeR, label = c("DESeq2", "EdgeR"), title = "Comparison of DESeq and EdgeR DE Genes", plot = FALSE)
+
+comp$plot
+
+comp$table
+```
+## Other Tools{.tabset}
+Other Tools.
+### Protein Alignment
+```{r protalign, echo = TRUE}
+#███╗   ███╗███████╗ █████╗ 
+#████╗ ████║██╔════╝██╔══██╗
+#██╔████╔██║███████╗███████║
+#██║╚██╔╝██║╚════██║██╔══██║
+#██║ ╚═╝ ██║███████║██║  ██║
+#╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝
+#-. .-.   .-. .-.   .-. .-.   .-. .-.   .-. .-.   .-. .-.   .-. .-.   .-. .-.      
+#||\|||\ /|||\|||\ /|||\|||\ /|||\|||\ /|||\|||\ /|||\|||\ /|||\|||\ /|||\|||\ 
+#|/ \|||\|||/ \|||\|||/ \|||\|||/ \|||\|||/ \|||\|||/ \|||\|||/ \|||\|||/ \|||\
+#~   `-~ `-`   `-~ `-`   `-~ `-~   `-~ `-`   `-~ `-`   `-~ `-~   `-~ `-`   `-~ 
+#############################
+library(msa)
+
+seq <- readAAStringSet("hglobin.fa")
+
+
+seq
+
+# Let's align the 8 different amino acid sequences
+alignments <- msa(seq, method = "ClustalW")
+alignments
+
+msaPrettyPrint(alignments, output = "pdf", showNames = "left", 
+               showLogo = "none", askForOverwrite = FALSE, 
+               verbose = TRUE, file = "whole_align.pdf")
+
+msaPrettyPrint(alignments, c(10,30), output = "pdf", showNames = "left",
+               file = "Zoomed_align.pdf", showLogo = "top", askForOverwrite = FALSE,
+               verbose = TRUE)
+
+# Let's make a tree from our alignment
+
+library(ape)
+library(seqinr)
+
+# Convert to to seqinr alignment _> get the distances and make a tree
+alignment_seqinr <- msaConvert(alignments, type = "seqinr::alignment")
+
+distances1 <- seqinr::dist.alignment(alignment_seqinr, "identity")
+
+tree <- ape::nj(distances1)
+plot(tree, main = "Phylogenetic Tree of HBA Sequences")
+####
+```
+### Synteny
+```{r synteny, echo = TRUE}
+#███████╗██╗   ██╗███╗   ██╗████████╗███████╗███╗   ██╗██╗   ██╗
+#██╔════╝╚██╗ ██╔╝████╗  ██║╚══██╔══╝██╔════╝████╗  ██║╚██╗ ██╔╝
+#███████╗ ╚████╔╝ ██╔██╗ ██║   ██║   █████╗  ██╔██╗ ██║ ╚████╔╝ 
+#╚════██║  ╚██╔╝  ██║╚██╗██║   ██║   ██╔══╝  ██║╚██╗██║  ╚██╔╝  
+#███████║   ██║   ██║ ╚████║   ██║   ███████╗██║ ╚████║   ██║   
+#╚══════╝   ╚═╝   ╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚═╝  ╚═══╝   ╚═╝
+#########
+library(DECIPHER)
+
+# In the first step, we load the libraries and the sequence into the long_seqs
+# This is a DNAStringSet object
+
+setwd("~/Desktop/classroom/myfiles")
+long_seq <- readDNAStringSet("plastid_genomes.fa")
+long_seq
+
+# Now let's build a temporary SQLite database
+Seqs2DB(long_seq, "XStringSet", "long_db", names(long_seq))
+
+# Now that we've built the database, we can do the following:
+# Find the syntenic blocks
+
+synteny <- FindSynteny("long_db")
+
+# View blocks with plotting
+pairs(synteny)
+plot(synteny)
+
+# Make an actual alignment file
+alignment <- AlignSynteny(synteny, "long_db")
+
+# Let's create a structure holding all aligned syntenic blocks for a pair of sequences
+block <- unlist(alignment[[1]])
+
+# We can write to file one alignment at a time
+writeXStringSet(block, "genome_blocks_out.fa")
+```
+### Unannotated Regions
+```{r unannReg, echo = TRUE}
+#██████╗ ███████╗ █████╗ ███╗   ███╗████████╗ ██████╗  ██████╗ ██╗     ███████╗
+#██╔══██╗██╔════╝██╔══██╗████╗ ████║╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝
+#██████╔╝███████╗███████║██╔████╔██║   ██║   ██║   ██║██║   ██║██║     ███████╗
+#██╔══██╗╚════██║██╔══██║██║╚██╔╝██║   ██║   ██║   ██║██║   ██║██║     ╚════██║
+#██║  ██║███████║██║  ██║██║ ╚═╝ ██║   ██║   ╚██████╔╝╚██████╔╝███████╗███████║
+#╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝   ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝
+#-. .-.   .-. .-.   .-. .-.   .-. .-.   .-. .-.   .-. .-.   .-. .-.   .-. .-.      
+#||\|||\ /|||\|||\ /|||\|||\ /|||\|||\ /|||\|||\ /|||\|||\ /|||\|||\ /|||\|||\ 
+#|/ \|||\|||/ \|||\|||/ \|||\|||/ \|||\|||/ \|||\|||/ \|||\|||/ \|||\|||/ \|||\
+#~   `-~ `-`   `-~ `-`   `-~ `-~   `-~ `-`   `-~ `-`   `-~ `-~   `-~ `-`   `-~ 
+###########
+library(locfit)
+library(Rsamtools)
+setwd("~/Desktop/classroom/myfiles")
+
+# Let's create a function that will load the gene region information in a GFF
+# file and convert it to a bioconductor GRanges object
+
+get_annotated_regions_from_gff <- function(file_name) {
+  gff <- rtracklayer::import.gff(file_name)
+  as(gff, "GRanges")
+}
+
+# Get count in windows across the genome in 500bp segments
+whole_genome <- csaw::windowCounts(
+  file.path("windows.bam"),
+  bin = TRUE, 
+  filter = 0, 
+  width = 500, 
+  param = csaw::readParam(
+    minq = 20, # Determines what is a passing read
+    dedup = TRUE, # Removes PCR duplicate
+    pe = "both" # requires that both pairs of reads are aligned
+  )
+)
+
+# Since this is a single column of data, let's rename it
+colnames(whole_genome) <- c("small_data")
+
+annotated_regions <- get_annotated_regions_from_gff(file.path(getwd(), "genes.gff"))
+
+# Now that we have the windows of high expression, we want to see if any of them 
+# overlap with annotated regions.
+
+library(IRanges)
+library(SummarizedExperiment)
+
+# Find the overlaps between the windows we made
+
+windows_in_genes <- IRanges::overlapsAny(
+  SummarizedExperiment::rowRanges(whole_genome), # creates a Granges object
+  annotated_regions
+)
+
+windows_in_genes
+
+# Here we subset the whole_genome object into annotated and nonannotated regions
+annotated_window_counts <- whole_genome[windows_in_genes,]
+non_annotated_window_counts <- whole_genome[!windows_in_genes,]
+
+# Use assay () to extract the actual counts from the GRanges object
+assay(non_annotated_window_counts)
+
+# In this step, we use Rsamtools Puleup() function to get a per-base coverage dataframe,
+# each row represents a single nucleotide in the reference count and the count column
+# gives the depth of coverage at that point
+
+library(bumphunter)
+
+pile_df <- Rsamtools::pileup("windows.bam")
+
+# This step groups the reads with certain distance of each other into a cluster. We give 
+# the sequence names, position and distance.
+
+clusters <- bumphunter::clusterMaker(pile_df$seqnames, pile_df$pos, maxGap = 100)
+
+table(clusters)
+
+# In this step, we will map the reads to the regions we found for the genome
+bumphunter::regionFinder(pile_df$count, pile_df$seqnames, pile_df$pos, clusters, cutoff = 1)
+```
+## Phylogenetic Analysis{.tabset}
+### Treeio
+```{r treeio, echo = TRUE}
+#████████╗██████╗ ███████╗███████╗██╗ ██████╗        
+#╚══██╔══╝██╔══██╗██╔════╝██╔════╝██║██╔═══██╗       
+#   ██║   ██████╔╝█████╗  █████╗  ██║██║   ██║       
+#   ██║   ██╔══██╗██╔══╝  ██╔══╝  ██║██║   ██║       
+#   ██║   ██║  ██║███████╗███████╗██║╚██████╔╝       
+#   ╚═╝   ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝ ╚═════╝        
+#                                                    
+# ██████╗  ██████╗ ██████╗ ██╗      ██████╗ ████████╗
+#██╔════╝ ██╔════╝ ██╔══██╗██║     ██╔═══██╗╚══██╔══╝
+#██║  ███╗██║  ███╗██████╔╝██║     ██║   ██║   ██║   
+#██║   ██║██║   ██║██╔═══╝ ██║     ██║   ██║   ██║   
+#╚██████╔╝╚██████╔╝██║     ███████╗╚██████╔╝   ██║   
+# ╚═════╝  ╚═════╝ ╚═╝     ╚══════╝ ╚═════╝    ╚═╝   
+#########
+
+# Let's load the required packages:
+library(ggplot2)
+library(ggtree)
+library(treeio)
+setwd("~/Desktop/classroom/myfiles")
+# First we need to load our raw tree data.  It's a Newick format so we use:
+itol <- ape::read.tree("itol.nwk")
+
+# Now we will print out a very basic phylogenetic tree
+ggtree(itol)
+
+# We can also change the format to make it a circular tree
+ggtree(itol, layout = "circular")
+
+# we can also change the left-right/ up-down direction
+ggtree(itol) + coord_flip() + scale_x_reverse()
+
+# By using geom_tiplat() we can add names to the end of tips
+ggtree(itol) + geom_tiplab(color = "indianred", size = 1/5)
+
+# By adding a geom_strip() layer we can annotate clades in the tree with a block of color
+
+ggtree(itol, layout = "unrooted") + geom_strip(13,14, color = "red", barsize = 1)
+
+# We can highlight clades in unrooted trees with blobs of color using geom_hilight
+ggtree(itol, layout = "unrooted") + geom_hilight(node = 11, type = "encircle", fill = "steelblue")
+
+
+install.packages('BAMMtools')
+library(BAMMtools)
+
+# We can use the MRCA (most recent common ancestor) function to find the node we want
+getmrca(itol, "Photorhabdus_luminescens", "Blochmannia_floridanus")
+
+# Now if we want to highlight the section of the most recent common ancester between the two
+ggtree(itol, layout = "unrooted") + geom_hilight(node = 206, type = "encircle", fill = "steelblue")
+```
+### Treespace
+```{r treespace, echo = TRUE}
+#████████╗██████╗ ███████╗███████╗███████╗██████╗  █████╗  ██████╗███████╗
+#╚══██╔══╝██╔══██╗██╔════╝██╔════╝██╔════╝██╔══██╗██╔══██╗██╔════╝██╔════╝
+#   ██║   ██████╔╝█████╗  █████╗  ███████╗██████╔╝███████║██║     █████╗  
+#   ██║   ██╔══██╗██╔══╝  ██╔══╝  ╚════██║██╔═══╝ ██╔══██║██║     ██╔══╝  
+#   ██║   ██║  ██║███████╗███████╗███████║██║     ██║  ██║╚██████╗███████╗
+#   ╚═╝   ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝╚═╝     ╚═╝  ╚═╝ ╚═════╝╚══════╝
+########
+
+# Quantifying difference between trees with treespace
+setwd("~/Desktop/classroom/myfiles")
+# First, let's load the required packages
+library(ape)
+library(adegraphics)
+library(treespace)
+
+# Now we need to load all the treefiles into a multiPhylo object
+
+treefiles <- list.files(file.path(getwd(),"gene_trees"), full.names = TRUE)
+tree_list <- lapply(treefiles, read.tree)
+class(tree_list)
+
+class(tree_list) <- "multiPhylo"
+
+class(tree_list)
+
+# Now we can compute the kendall-coljin distances between trees. This function
+# does a LOT of analyses.
+
+# First it runs a pairwise comparison of all trees in theh input
+# Second it carries out clustering using PCA
+# These results are returned in a list of objects, where $D contains the pairwise
+# metric of the trees, and $pco contains the PCA.  The method we use (Kendall-Coljin) is
+# particularly suitable for rooted trees as we have here.  The option NF tells us how
+# many principal components to retain.
+
+comparisons <- treespace(tree_list, nf = 3)
+
+# We can plot the pairwise distances between trees with table.image
+table.image(comparisons$D, nclass= 25)
+
+# Now let's print the PCA and clusters.  This shows us how the group of trees cluster
+plotGroves(comparisons$pco, lab.show = TRUE, lab.cex = 1.5)
+
+groves <- findGroves(comparisons, nclust = 4)
+plotGroves(groves)
+```
+### Subtrees
+```{r subtree, echo = TRUE}
+#███████╗██╗   ██╗██████╗ ████████╗██████╗ ███████╗███████╗
+#██╔════╝██║   ██║██╔══██╗╚══██╔══╝██╔══██╗██╔════╝██╔════╝
+#███████╗██║   ██║██████╔╝   ██║   ██████╔╝█████╗  █████╗  
+#╚════██║██║   ██║██╔══██╗   ██║   ██╔══██╗██╔══╝  ██╔══╝  
+#███████║╚██████╔╝██████╔╝   ██║   ██║  ██║███████╗███████╗
+#╚══════╝ ╚═════╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝╚══════╝╚══════╝
+#########
+# Extracting and working with subtrees using APE
+
+setwd("~/Desktop/classroom/myfiles")
+
+# Load our required packages
+library(ape)
+??ape
+# Now let's load the tree data we will be working with
+newick <- read.tree("mammal_tree.nwk.txt")
+
+l <- subtrees(newick)
+
+# Let's plot the tree to see what it looks like
+plot(newick)
+
+# Extract the tree manually
+small_tree <- extract.clade(newick,9)
+
+plot(small_tree)
+
+# Now what if we want to bind two trees together.
+
+new_tree <- bind.tree(newick, small_tree, 3)
+plot(new_tree)
+```
+### Trees from Alignment
+```{r treesfrmalign, echo = TRUE}
+# █████╗ ██╗     ██╗ ██████╗ ███╗   ██╗██████╗ ████████╗██████╗ ███████╗███████╗
+#██╔══██╗██║     ██║██╔════╝ ████╗  ██║╚════██╗╚══██╔══╝██╔══██╗██╔════╝██╔════╝
+#███████║██║     ██║██║  ███╗██╔██╗ ██║ █████╔╝   ██║   ██████╔╝█████╗  █████╗  
+#██╔══██║██║     ██║██║   ██║██║╚██╗██║██╔═══╝    ██║   ██╔══██╗██╔══╝  ██╔══╝  
+#██║  ██║███████╗██║╚██████╔╝██║ ╚████║███████╗   ██║   ██║  ██║███████╗███████╗
+#╚═╝  ╚═╝╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚══════╝
+#########
+
+# Reconstructing trees from alignments
+
+setwd("~/Desktop/classroom/myfiles")
+
+# Let's load the packages
+library(Biostrings)
+library(msa)
+library(phangorn)
+
+# First we'll load the sequences into a seqs variable
+seqs <- readAAStringSet("abc.fa")
+
+# Now, let's construct an alignment with the msa package and ClustalOmega
+aln <- msa::msa(seqs, method = c("ClustalOmega"))
+
+# To create a tree, we need to convert the alignment to a phyData object
+aln <- as.phyDat(aln, type = 'AA')
+
+class(aln)
+
+# In this step, we'll actually make the trees.  Trees are made from a distance matrix,
+# which can be computed with dist.ml() - ML stands for maximum likelihood
+
+dist_mat <- dist.ml(aln)
+
+# Now we pass the distance matrix to upgma to make an UPGMA tree
+upgma_tree <- upgma(dist_mat)
+plot(upgma_tree, main = "UPGMA")
+
+# We can conversley pass the distance matrix to a neighbor joining function
+nj_tree <- NJ(dist_mat)
+plot(nj_tree, main = "NJ")
+
+# Lastly, we are going to use the bootstraps.phyDat() function to compute bootstrap
+# support for the branches of the tree.  The first argument is the object (aln), while
+# the second argument in the function NJ
+
+# Bootstraps are essentially confidence intervals for how the clade is placed
+# in the correct position
+
+fit <- pml(nj_tree, aln)
+
+bootstraps <- bootstrap.phyDat(aln, FUN = function(x) {NJ(dist.ml(x))}, bs = 100)
+
+plotBS(nj_tree, bootstraps, p = 10)
+```
+## Genome Wide Association Study{.tabset}
+### Variant Tools
+```{r vtools, echo = TRUE}
+#██╗   ██╗████████╗ ██████╗  ██████╗ ██╗     ███████╗
+#██║   ██║╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝
+#██║   ██║   ██║   ██║   ██║██║   ██║██║     ███████╗
+#╚██╗ ██╔╝   ██║   ██║   ██║██║   ██║██║     ╚════██║
+# ╚████╔╝    ██║   ╚██████╔╝╚██████╔╝███████╗███████║
+#  ╚═══╝     ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝
+########
+# First let's load the required libraries
+setwd("~/Desktop/classroom/myfiles")
+library(GenomicRanges)
+library(gmapR)
+library(rtracklayer)
+library(VariantAnnotation)
+library(VariantTools)
+
+# Now we want to load our datasets.  We need .Bam and .fa files for this pipeline
+# to work
+
+bam_file <- file.path(getwd(), "hg17_snps.bam")
+
+fasta_file <- file.path(getwd(), "chr17.83k.fa")
+
+# Now we need to set up the genome object and the parameters object:
+fa <- rtracklayer::FastaFile(fasta_file)
+
+# Now we create a GMapGenome object, which describes the genome to the later
+# variant calling function
+
+genome <- gmapR::GmapGenome(fa, create = TRUE)
+
+# This next step sets our parameter for what is considered a variant.
+# There can be a lot of fine-tuning to this function.
+# We are just going to use the standard settings.
+
+qual_params <- TallyVariantsParam(
+  genome = genome,
+  minimum_mapq = 20)
+
+var_params <- VariantCallingFilters(read.count = 19, p.lower = 0.01)
+
+# Now we use callVariants function in accordance with our parameters we defined above.
+
+called_variants <- callVariants(bam_file,
+                                qual_params,
+                                calling.filter = var_params)
+
+head(called_variants)
+# We have identified 6 variants
+
+# Now we move on to annotation and load the feature position information from gff.
+get_annotated_regions_from_gff <- function(file_name) {
+  gff <- rtracklayer::import.gff(file_name)
+  as(gff, "GRanges")
+}
+
+# Note you can also load this data from a bed file.
+
+genes <- get_annotated_regions_from_gff("chr17.83k.gff3")
+
+# Now we can calculate which variants overlap which genes
+overlaps <- GenomicRanges::findOverlaps(called_variants, genes)
+
+overlaps
+
+# And lastly we subset the genes with the list of overlaps
+
+identified <- genes[subjectHits(overlaps)]
+```
+### Open Reading Frames
+```{r orfs, echo = TRUE}
+# ██████╗ ██████╗ ███████╗███████╗
+#██╔═══██╗██╔══██╗██╔════╝██╔════╝
+#██║   ██║██████╔╝█████╗  ███████╗
+#██║   ██║██╔══██╗██╔══╝  ╚════██║
+#╚██████╔╝██║  ██║██║     ███████║
+# ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚══════╝
+#########
+# First thing, let's load the required packages
+library(Biostrings)
+library(systemPipeR)
+
+# Let's load the data into a DNAStrings object, in this case, and Arabidopsis choloroplast 
+# genome.
+
+dna_object <- readDNAStringSet("arabidopsis_chloroplast.fa.txt")
+
+# Now let's predict the open reading frames with predORF().
+# We'll predict all ORF on both strands.
+
+predict_orfs <- predORF(dna_object, n = 'all', type = 'gr', mode = 'ORF', strand = 'both',
+                        longest_disjoint = TRUE)
+predict_orfs
+
+# This printed out a GRanges object in return, with 2,501 open reading frames.
+# This is FAR too many open reading frames.
+
+# To filter out erronous ORFs, we do a simulation.  We first estimate the length 
+# an ORF can reach by chance.  We will create a string of random nucleotides
+# that is the length of our chloroplast genome and determine the longer
+# ORF that can arise by chance.
+
+bases <- c("A", "T", "G", "C")
+raw_seq_string <- strsplit(as.character(dna_object), "")
+
+# Now we need to ensure that our random nucleotides match the proportion of nucleotides
+# in our chloroplast genome so we have no bias.
+
+seq_length <- width(dna_object[1])
+counts <- lapply(bases, function(x) {sum(grepl(x, raw_seq_string))})
+probs <- unlist(lapply(counts, function(base_count){signif(base_count/seq_length, 2)}))
+probs
+   
+# Now we can build our function to simulate a genome.
+
+get_longest_orf_in_random_genome <- function(x,
+                                             length = 1000,
+                                             probs = c(0.25, 0.25, 0.25, 0.25),
+                                             bases = c("A", "T", "G", "C")){
+  # Here we create our random genome and allow replacement for the next iteration
+  random_genome <- paste0(sample(bases, size = length, replace = TRUE, prob = probs), collapse = "")
+  random_dna_object <- DNAStringSet(random_genome)
+  names(random_dna_object) <- c("random_dna_string")
+  
+  orfs <- predORF(random_dna_object, n = 1, type = 'gr', mode = 'ORF', strand = 'both', longest_disjoint = TRUE)
+  return(max(width(orfs)))
+}
+
+# Now we use the function we just created to predict the ORFs in 10 random genomes
+random_lengths <- unlist(lapply(1:10, get_longest_orf_in_random_genome, length = seq_length, probs = probs, bases = bases))
+
+# Let's pull out the longest length from our 10 simulations
+longest_random_orf <- max(random_lengths)
+
+# Let's only keep the frames that are longer in our chloroplast genome
+keep <- width(predict_orfs) > longest_random_orf
+
+orfs_to_keep <- predict_orfs[keep]
+orfs_to_keep
+
+# Write this data to file
+extracted_orfs <- BSgenome::getSeq(dna_object, orfs_to_keep)
+names(extracted_orfs) <- paste0("orf_", 1:length(orfs_to_keep))
+writeXStringSet(extracted_orfs, "saved_orfs.fa")
+
+```
+### KaryoploteR
+```{r karyoploteR, echo = TRUE}
+#██╗  ██╗ █████╗ ██████╗ ██╗   ██╗ ██████╗ ██████╗ ██╗      ██████╗ ████████╗███████╗██████╗ 
+#██║ ██╔╝██╔══██╗██╔══██╗╚██╗ ██╔╝██╔═══██╗██╔══██╗██║     ██╔═══██╗╚══██╔══╝██╔════╝██╔══██╗
+#█████╔╝ ███████║██████╔╝ ╚████╔╝ ██║   ██║██████╔╝██║     ██║   ██║   ██║   █████╗  ██████╔╝
+#██╔═██╗ ██╔══██║██╔══██╗  ╚██╔╝  ██║   ██║██╔═══╝ ██║     ██║   ██║   ██║   ██╔══╝  ██╔══██╗
+#██║  ██╗██║  ██║██║  ██║   ██║   ╚██████╔╝██║     ███████╗╚██████╔╝   ██║   ███████╗██║  ██║
+#╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝    ╚═════╝ ╚═╝     ╚══════╝ ╚═════╝    ╚═╝   ╚══════╝╚═╝  ╚═╝
+#########
+# First let's load the required packages
+library(karyoploteR)
+library(GenomicRanges)
+
+# Now we need to set up the genome object for our karyotype
+genome_df <- data.frame(
+  # First we dictate the number of chromosomes
+  chr = paste0("chr", 1:5),
+  start = rep(1,5),
+  # and then we will dictate the length of each chromosome
+  end = c(34964571, 22037565, 25499034, 20862711, 31270811)
+)
+
+# Now we convert the dataframe to a granges object
+genome_gr <- makeGRangesFromDataFrame(genome_df)
+
+# Now let's create some snp positions to map out.  We do this by using the sample () function
+snp_pos <- sample(1:1e7, 25)
+snps <- data.frame(
+  chr = paste0("chr", sample(1:5,25, replace = TRUE)),
+  start = snp_pos,
+  end = snp_pos
+)
+
+# Again we convert the dataframe to granges
+snps_gr <- makeGRangesFromDataFrame(snps)
+
+# Now let's create some snp labels
+snp_labels <- paste0("snp_", 1:25)
+
+# Here we will set the margins for our plot
+plot.params <- getDefaultPlotParams(plot.type =1)
+
+# Here we will set the margins for our plot
+plot.params$data1outmargin <- 600
+
+# Now let's plot our snps
+kp <- plotKaryotype(genome = genome_gr, plot.type = 1, plot.params = plot.params)
+kpPlotMarkers(kp, snps_gr, labels = snp_labels)
+
+
+# We can also add some numeric data to our plots.  We will generate 100 random numbers that 
+# plot to 100 windows on chromosome 4
+
+numeric_data <- data.frame(
+  y = rnorm(100, mean = 1, sd = 0.5),
+  chr = rep("chr4", 100),
+  start = seq(1,20862771, 20962711/100),
+  end = seq(1,20862771, 20962711/100)
+)
+
+# Now let's make the data granges object
+numeric_data_gr <- makeGRangesFromDataFrame(numeric_data)
+
+# Again let's set our plot parameters
+plot.params <- getDefaultPlotParams(plot.type = 2)
+plot.params$data1outmargin <- 800 
+plot.params$data2outmargin <- 800
+plot.params$topmargin <- 800
+
+# Let's plot the data
+kp <- plotKaryotype(genome = genome_gr, plot.type = 2, plot.params = plot.params)
+kpPlotMarkers(kp, snps_gr, labels = snp_labels)
+kpLines(kp, numeric_data_gr, y = numeric_data$y, data.panel = 2)
+```
