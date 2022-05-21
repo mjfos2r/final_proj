@@ -1,7 +1,10 @@
 #lol dependency hell is real. If i was a ~real~ programmer I'd just feed an array of dependencies into a loop but dear god it could barely handle regular mirror decl. 
 #also thanks berkeley for doing maintenance on your CRAN mirror/getting ddos'd while I'm trying to debug why none of my dependencies are installing.
-#                  ||
-#hell begins below \/
+# I should add that despite the below being the not berkeley one, my env was using berkeley's anyway even when declared otherwise.
+# 
+# This is the one that worked.
+#                  
+#hell begins below 
 # depchecks
 if(!require("tidyverse")) install.packages("tidyverse",repos = "http://cran.us.r-project.org")
 if(!require("datasets")) install.packages("datasets",repos = "http://cran.us.r-project.org")
